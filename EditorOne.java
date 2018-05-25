@@ -1,27 +1,22 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
 
 import javax.swing.*;
 
-import EditorOne.Mode;
-
 /**
- * Client-server graphical editor
+ * Basic shape drawing GUI
  * 
  * @author Chris Bailey-Kellogg, Dartmouth CS 10, Fall 2012; loosely based on CS 5 code by Tom Cormen
- * @author CBK, winter 2014, overall structure substantially revised
- * @author Travis Peters, Dartmouth CS 10, Winter 2015; remove EditorCommunicatorStandalone (use echo server for testing)
- * @author CBK, spring 2016 and Fall 2016, restructured Shape and some of the GUI
+ * @author CBK, lightly revised Winter 2014
+ * @author CBK, restructured Shape/Drawer and some of the GUI, Spring 2016
+ * @author CBK, more restructuring and simplification, Fall 2016
  */
 
-public class Editor extends JFrame {	
-	private static String serverIP = "localhost";			// IP address of sketch server
-	// "localhost" for your own machine;
-	// or ask a friend for their IP address
-
-	private static final int width = 800, height = 800;		// canvas size
+public class EditorOne extends JFrame {	
+	private static final int width = 800, height = 800;
+	//Goal of this map is to store the shapes crated with unique integers as keys.
+	private HashMap shapeMap = new HashMap<Integer, Shape>();
 
 	// Current settings on GUI
 	public enum Mode {
@@ -32,25 +27,12 @@ public class Editor extends JFrame {
 	private Color color = Color.black;			// current drawing color
 
 	// Drawing state
-	// these are remnants of my implementation; take them as possible suggestions or ignore them
-	private Shape curr = null;					// current shape (if any) being drawn
-	private Sketch sketch;						// holds and handles all the completed objects
-	private int movingId = -1;					// current shape id (if any; else -1) being moved
+	private Ellipse shape = null;				// the only object (if any) in our editor
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
 
-
-	// Communication
-	private EditorCommunicator comm;			// communication with the sketch server
-
-	public Editor() {
+	public EditorOne() {
 		super("Graphical Editor");
-
-		sketch = new Sketch();
-
-		// Connect to server
-		comm = new EditorCommunicator(serverIP, this);
-		comm.start();
 
 		// Helpers to create the canvas and GUI (buttons, etc.)
 		JComponent canvas = setupCanvas();
@@ -76,7 +58,12 @@ public class Editor extends JFrame {
 		JComponent canvas = new JComponent() {
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				drawSketch(g);
+				// TODO: YOUR CODE HERE
+				// Call helper method to draw the sketch on g
+				System.out.println("repainting!");
+				if(shape != null) {
+					drawSketch(g);
+				}
 			}
 		};
 		
@@ -84,17 +71,33 @@ public class Editor extends JFrame {
 
 		canvas.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent event) {
+				// TODO: YOUR CODE HERE
+				// Call helper method to handle the mouse press
+				System.out.println("pressed at "+event.getPoint());
 				handlePress(event.getPoint());
 			}
 
 			public void mouseReleased(MouseEvent event) {
+				// TODO: YOUR CODE HERE
+				// Call helper method to handle the mouse release
+				System.out.println("released at "+event.getPoint());
 				handleRelease();
 			}
 		});		
 
 		canvas.addMouseMotionListener(new MouseAdapter() {
 			public void mouseDragged(MouseEvent event) {
-				handleDrag(event.getPoint());
+				// TODO: YOUR CODE HERE
+				// Call helper method to handle the mouse drag
+				System.out.println("dragged to "+event.getPoint());
+				if(mode == Mode.MOVE) {
+					handleDrag(event.getPoint());
+				}
+
+				if(mode == Mode.DRAW) {
+					handleDrag(event.getPoint());
+				}
+				
 			}
 		});
 		
@@ -106,7 +109,7 @@ public class Editor extends JFrame {
 	 */
 	private JComponent setupGUI() {
 		// Select type of shape
-		String[] shapes = {"ellipse", "freehand", "rectangle", "segment"};
+		String[] shapes = {"ellipse"};
 		JComboBox<String> shapeB = new JComboBox<String>(shapes);
 		shapeB.addActionListener(e -> shapeType = (String)((JComboBox<String>)e.getSource()).getSelectedItem());
 
@@ -157,65 +160,40 @@ public class Editor extends JFrame {
 		gui.add(modesP);
 		return gui;
 	}
-
-	/**
-	 * Getter for the sketch instance variable
-	 */
-	public Sketch getSketch() {
-		return sketch;
-	}
-
-	/**
-	 * Draws all the shapes in the sketch,
-	 * along with the object currently being drawn in this editor (not yet part of the sketch)
-	 */
-	public void drawSketch(Graphics g) {
-		// TODO: YOUR CODE HERE
-		
-	}
-
-	// Helpers for event handlers
 	
 	/**
 	 * Helper method for press at point
-	 * In drawing mode, start a new object;
-	 * in moving mode, (request to) start dragging if clicked in a shape;
-	 * in recoloring mode, (request to) change clicked shape's color
-	 * in deleting mode, (request to) delete clicked shape
 	 */
 	private void handlePress(Point p) {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, start drawing a new shape
-				if(mode == Mode.DRAW) {
-					shape = new Ellipse(p.x, p.y, color);
-					drawFrom = p;
-					moveFrom = p;
-					handleDrag(p);
-				}
-				// In moving mode, start dragging if clicked in the shape
-				if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
-					handleDrag(p);
-				}
-				// In recoloring mode, change the shape's color if clicked in it
-				if(mode == Mode.RECOLOR && shape.contains(p.x, p.y)) {
-					shape.setColor(color);
-				}
-				// In deleting mode, delete the shape if clicked in it
-				if(mode == Mode.DELETE && shape.contains(p.x, p.y)) {
-					shape = null;
-					moveFrom = null;
-					drawFrom = null;
-					color = null;
-				}
-				// Be sure to refresh the canvas (repaint) if the appearance has changed
-				repaint();
-			}
+		if(mode == Mode.DRAW) {
+			shape = new Ellipse(p.x, p.y, color);
+			drawFrom = p;
+			moveFrom = p;
+			handleDrag(p);
+		}
+		// In moving mode, start dragging if clicked in the shape
+		if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
+			handleDrag(p);
+		}
+		// In recoloring mode, change the shape's color if clicked in it
+		if(mode == Mode.RECOLOR && shape.contains(p.x, p.y)) {
+			shape.setColor(color);
+		}
+		// In deleting mode, delete the shape if clicked in it
+		if(mode == Mode.DELETE && shape.contains(p.x, p.y)) {
+			shape = null;
+			moveFrom = null;
+			drawFrom = null;
+			color = null;
+		}
+		// Be sure to refresh the canvas (repaint) if the appearance has changed
+		repaint();
 	}
 
 	/**
 	 * Helper method for drag to new point
-	 * In drawing mode, update the other corner of the object;
-	 * in moving mode, (request to) drag the object
 	 */
 	private void handleDrag(Point p) {
 		// TODO: YOUR CODE HERE
@@ -237,8 +215,6 @@ public class Editor extends JFrame {
 
 	/**
 	 * Helper method for release
-	 * In drawing mode, pass the add new object request on to the server;
-	 * in moving mode, release it		
 	 */
 	private void handleRelease() {
 		// TODO: YOUR CODE HERE
@@ -247,10 +223,19 @@ public class Editor extends JFrame {
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 
+	/**
+	 * Draw the whole sketch (here maybe a single shape)
+	 */
+	private void drawSketch(Graphics g) {
+		// TODO: YOUR CODE HERE
+		// Draw the current shape if it exists
+		shape.draw(g);
+	}
+
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				new Editor();
+				new EditorOne();
 			}
 		});	
 	}
