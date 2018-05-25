@@ -11,26 +11,65 @@ import java.awt.Graphics;
  */
 public class Rectangle implements Shape {
 	// TODO: YOUR CODE HERE
+	Color color;
+	int x1, y1, x2, y2;
+	
+	public Rectangle(int x1, int y1, Color color) {
+		this.x1 = x1; this.y1 = y1;
+		this.color = color;
+	}
+	
+	public Rectangle(int x1, int y1, int x2, int y2, Color color) {
+		this.x1 = x1; this.y1 = y1; this.x2 = x2; this.y2 = y2;
+		ensureCorrectBounds();
+		this.color = color;
+	}
+	
+	public void ensureCorrectBounds(){
+		if(x1 > x2) {
+			int temp = x1;
+			x1 = x2;
+			x2 = temp;
+		}
+		if(y1 > y2) {
+			int temp = y1;
+			y1 = y2;
+			y2 = temp;
+		}
+	}
+	
 	@Override
 	public void moveBy(int dx, int dy) {
+		x1 += dx; x2 += dx;
+		y1 += dy; y2 += dy;
+		ensureCorrectBounds();
 	}
 
 	@Override
 	public Color getColor() {
+		return color;
 	}
 
 	@Override
 	public void setColor(Color color) {
+		this.color = color;
 	}
 		
 	@Override
 	public boolean contains(int x, int y) {
+		if(x1 -3 < x && x < x2 + 3 && y1 - 3 < y && y < y2 + 3) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public void draw(Graphics g) {
+		g.setColor(color);
+		g.drawRect(x1, y1, x2 - x1, y2 - y1);
 	}
 
 	public String toString() {
+		return "Rectangle: x1: " + x1 + ", y1: " + y1 + ", x2: " + x2 + ", y2: " + y2;
 	}
 }
