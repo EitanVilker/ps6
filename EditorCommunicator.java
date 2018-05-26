@@ -1,6 +1,7 @@
 package ps6;
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 
 /**
  * Handles communication to/from the server for the editor
@@ -13,6 +14,7 @@ public class EditorCommunicator extends Thread {
 	private PrintWriter out;		// to server
 	private BufferedReader in;		// from server
 	protected Editor editor;		// handling communication for
+
 
 	/**
 	 * Establishes connection and in/out pair

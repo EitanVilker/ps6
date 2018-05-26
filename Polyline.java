@@ -16,8 +16,28 @@ public class Polyline implements Shape {
 	private Color color;
 	private ArrayList<Point> pointList = new ArrayList<Point>();
 
+	/**
+	 * Initial 0-length segment at a point
+	 */
+	public Polyline(int x1, int y1, Color color) {
+		pointList.add(new Point(x1, y1));
+		this.color = color;
+	}
+
+	/**
+	 * Complete segment from one point to the other
+	 */
+	public Polyline(int x1, int y1, int x2, int y2, Color color) {
+		pointList.add(new Point(x1, y1));
+		pointList.add(new Point(x2, y2));
+		this.color = color;
+	}	
 	@Override
 	public void moveBy(int dx, int dy) {
+		for(int i = 0; i < pointList.size(); i++) {
+			pointList.get(i).x += dx;
+			pointList.get(i).y += dy;
+		}
 	}
 
 	@Override
@@ -34,8 +54,37 @@ public class Polyline implements Shape {
 		pointList.add(new Point(x, y));
 	}
 	
+	/**
+	 * Euclidean distance squared between (x1,y1) and (x2,y2)
+	 */
+	public static double dist2(double x1, double y1, double x2, double y2) {
+		return (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1);
+	}
+	
+	/**
+	 * Helper method to compute the distance between a point (x,y) and a segment (x1,y1)-(x2,y2)
+	 * http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+	 */
+	public static double pointToSegmentDistance(int x, int y, int x1, int y1, int x2, int y2) {
+		double l2 = dist2(x1, y1, x2, y2);
+		if (l2 == 0) return Math.sqrt(dist2(x, y, x1, y1)); // segment is a point
+		// Consider the line extending the segment, parameterized as <x1,y1> + t*(<x2,y2> - <x1,y1>).
+		// We find projection of point <x,y> onto the line. 
+		// It falls where t = [(<x,y>-<x1,y1>) . (<x2,y2>-<x1,y1>)] / |<x2,y2>-<x1,y1>|^2
+		double t = ((x-x1)*(x2-x1) + (y-y1)*(y2-y1)) / l2;
+		// We clamp t from [0,1] to handle points outside the segment.
+		t = Math.max(0, Math.min(1, t));
+		return Math.sqrt(dist2(x, y, x1+t*(x2-x1), y1+t*(y2-y1)));
+	}
+	
 	@Override
 	public boolean contains(int x, int y) {
+		for(int i = 0; i < pointList.size() - 1; i++) {
+			if(pointToSegmentDistance(x, y, pointList.get(i).x, pointList.get(i).y, pointList.get(i + 1).x, pointList.get(i + 1).y) < 3) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
