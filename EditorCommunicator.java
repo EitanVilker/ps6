@@ -1,3 +1,4 @@
+package ps6;
 import java.io.*;
 import java.net.Socket;
 
