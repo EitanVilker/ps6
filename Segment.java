@@ -100,4 +100,9 @@ public class Segment implements Shape {
 	public String toString() {
 		return "segment "+x1+" "+y1+" "+x2+" "+y2+" "+color.getRGB();
 	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
 }

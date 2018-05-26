@@ -34,4 +34,9 @@ public interface Shape {
 	 * Draws the shape
 	 */
 	public void draw(Graphics g);
+	
+	/**
+	 * @return The shape's type
+	 */
+	public String getType();
 }

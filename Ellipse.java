@@ -80,4 +80,9 @@ public class Ellipse implements Shape {
 	public String toString() {
 		return "ellipse "+x1+" "+y1+" "+x2+" "+y2+" "+color.getRGB();
 	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
 }

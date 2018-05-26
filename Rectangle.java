@@ -1,6 +1,7 @@
 package ps6;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  * A rectangle-shaped Shape
@@ -13,7 +14,7 @@ import java.awt.Graphics;
 public class Rectangle implements Shape {
 	// TODO: YOUR CODE HERE
 	Color color;
-	int x1, y1, x2, y2;
+	private int x1, y1, x2, y2;
 	private String type = "rectangle";
 	
 	public Rectangle(int x1, int y1, Color color) {
@@ -46,7 +47,7 @@ public class Rectangle implements Shape {
 		y1 += dy; y2 += dy;
 		ensureCorrectBounds();
 	}
-	
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -67,6 +68,16 @@ public class Rectangle implements Shape {
 			return true;
 		}
 		return false;
+	}
+	public void setCorners(int x1,int y1, int x2, int y2) {
+		this.x1 = x1; this.x2 = x2; this.y1 = y1; this.y2 = y2;
+		ensureCorrectBounds();
+	}
+	public Point getTopLeft() {
+		return new Point(x1,y1);
+	}
+	public Point getBottomRight() {
+		return new Point(x2,y2);
 	}
 
 	@Override

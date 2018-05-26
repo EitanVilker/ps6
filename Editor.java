@@ -1,6 +1,7 @@
 package ps6;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
@@ -41,6 +42,7 @@ public class Editor extends JFrame {
 	private Shape curr = null;					// current shape (if any) being drawn
 	private Sketch sketch;						// holds and handles all the completed objects
 	private int movingId = -1;					// current shape id (if any; else -1) being moved
+	private int addingId = 0;
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
 
@@ -193,11 +195,24 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, start drawing a new shape
 		if(mode == Mode.DRAW) {
-			shape = new Ellipse(p.x, p.y, color);
-			drawFrom = p;
-			moveFrom = p;
-			handleDrag(p);
+			if(shapeType.equals("ellipse")) {
+				// curr = new Ellipse(p.x, p.y, color);
+				shapeMap.put(addingId, new Ellipse(p.x, p.y, color));
+				drawFrom = p;
+				// moveFrom = p;
+				//handleDrag(p);
+			} else if(shapeType.equals("rectangle")) {
+				shapeMap.put(addingId, new Rectangle(p.x,p.y,color));
+				drawFrom = p;
+			} else if(shapeType.equals("segment")){
+				shapeMap.put(addingId, new Segment(p.x, p.y, color));
+				drawFrom = p;
+			} else if(shapeType.equals("polyline")) {
+				shapeMap.put(addingId, new Polyline(p.x, p.y, color));
+			}
 		}
+		
+		
 		// In moving mode, start dragging if clicked in the shape
 		if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
 			handleDrag(p);
@@ -226,22 +241,43 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
-			for(Integer i: shapeMap.keySet()) {
-				if((Shape)(shapeMap.get(i)).getType().equals("ellipse")) {
-					shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
-
-				}
-				else if((Shape)(shapeMap.get(i)).getType().equals("rectangle")) {
-					
-				}
-				else if((Shape)(shapeMap.get(i)).getType().equals("segment")) {
-					
-				}
-				else if((Shape)(shapeMap.get(i)).getType().equals("polyline")) {
-					
-				}
+			Object holdShape = shapeMap.get(addingId);
+			if(((Shape)(shapeMap.get(addingId))).getType().equals("ellipse")) {
+				((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
+				
+			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("rectangle")) {
+				Point topLeft = ((Rectangle)(holdShape)).getTopLeft();
+				((Rectangle)(holdShape)).setCorners(topLeft.x, topLeft.y, p.x, p.y);
+				
+			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("segment")) {
+				((Segment)(holdShape)).setEnd(p.x, p.y);
+				
+			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("polyline")) {
+				((Polyline)(holdShape)).addPoint(p.x, p.y);
 			}
-			shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
+			
+			
+			
+			//Iterator<Shape> itr = shapeMap.keySet().iterator();
+			//while(itr.hasNext()) {
+			//	Shape shape = itr.next();
+		//		String shapeType = shape.getType();
+		//		if(shapeType == "ellipse") {
+		//			Ellipse holdEllipse = (Ellipse)(shape);
+		//			holdEllipse.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
+
+		//		}
+		//		else if((Shape)(shapeMap.get(i)).getType().equals("rectangle")) {
+		//			
+		//		}
+		//		else if((Shape)(shapeMap.get(i)).getType().equals("segment")) {
+					
+		//		}
+		//		else if((Shape)(shapeMap.get(i)).getType().equals("polyline")) {
+					
+		//		}
+			//}
+			// shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
 		}
 		// In moving mode, shift the object and keep track of where next step is from
 		if(mode == Mode.MOVE) {
@@ -264,6 +300,9 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In moving mode, stop dragging the object
 		moveFrom = null;
+		if(mode == mode.DRAW) {
+			addingId ++;
+		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 

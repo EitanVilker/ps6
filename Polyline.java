@@ -104,4 +104,9 @@ public class Polyline implements Shape {
 		}
 		return "PolyLine: " + temp + ", Color: " + color;
 	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
 }
