@@ -14,6 +14,7 @@ public class Polyline implements Shape {
 	// TODO: YOUR CODE HERE
 	private Color color;
 	private ArrayList<Point> pointList = new ArrayList<Point>();
+	private String type = "polyline";
 
 	/**
 	 * Initial 0-length segment at a point

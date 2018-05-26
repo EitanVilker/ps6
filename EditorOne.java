@@ -15,8 +15,7 @@ import javax.swing.*;
 
 public class EditorOne extends JFrame {	
 	private static final int width = 800, height = 800;
-	//Goal of this map is to store the shapes crated with unique integers as keys.
-	private HashMap shapeMap = new HashMap<Integer, Shape>();
+
 
 	// Current settings on GUI
 	public enum Mode {

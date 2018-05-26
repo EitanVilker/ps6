@@ -11,6 +11,7 @@ import java.awt.Graphics;
 public class Segment implements Shape {
 	private int x1, y1, x2, y2;		// two endpoints
 	private Color color;
+	private String type = "segment";
 
 	/**
 	 * Initial 0-length segment at a point

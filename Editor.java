@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
@@ -23,6 +24,9 @@ public class Editor extends JFrame {
 
 	private static final int width = 800, height = 800;		// canvas size
 
+	//Goal of this map is to store the shapes crated with unique integers as keys.
+	private HashMap shapeMap = new HashMap<Integer, Shape>();
+	
 	// Current settings on GUI
 	public enum Mode {
 		DRAW, MOVE, RECOLOR, DELETE
@@ -184,32 +188,32 @@ public class Editor extends JFrame {
 	 * in deleting mode, (request to) delete clicked shape
 	 */
 	private void handlePress(Point p) {
+		
 		// TODO: YOUR CODE HERE
 		// In drawing mode, start drawing a new shape
-				if(mode == Mode.DRAW) {
-					shape = new Ellipse(p.x, p.y, color);
-					drawFrom = p;
-					moveFrom = p;
-					handleDrag(p);
-				}
-				// In moving mode, start dragging if clicked in the shape
-				if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
-					handleDrag(p);
-				}
-				// In recoloring mode, change the shape's color if clicked in it
-				if(mode == Mode.RECOLOR && shape.contains(p.x, p.y)) {
-					shape.setColor(color);
-				}
-				// In deleting mode, delete the shape if clicked in it
-				if(mode == Mode.DELETE && shape.contains(p.x, p.y)) {
-					shape = null;
-					moveFrom = null;
-					drawFrom = null;
-					color = null;
-				}
-				// Be sure to refresh the canvas (repaint) if the appearance has changed
-				repaint();
-			}
+		if(mode == Mode.DRAW) {
+			shape = new Ellipse(p.x, p.y, color);
+			drawFrom = p;
+			moveFrom = p;
+			handleDrag(p);
+		}
+		// In moving mode, start dragging if clicked in the shape
+		if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
+			handleDrag(p);
+		}
+		// In recoloring mode, change the shape's color if clicked in it
+		if(mode == Mode.RECOLOR && shape.contains(p.x, p.y)) {
+			shape.setColor(color);
+		}
+		// In deleting mode, delete the shape if clicked in it
+		if(mode == Mode.DELETE && shape.contains(p.x, p.y)) {
+			shape = null;
+			moveFrom = null;
+			drawFrom = null;
+			color = null;
+		}
+		// Be sure to refresh the canvas (repaint) if the appearance has changed
+		repaint();
 	}
 
 	/**
@@ -221,6 +225,21 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
+			for(Integer i: shapeMap.keySet()) {
+				if((Shape)(shapeMap.get(i)).getType().equals("ellipse")) {
+					shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
+
+				}
+				else if((Shape)(shapeMap.get(i)).getType().equals("rectangle")) {
+					
+				}
+				else if((Shape)(shapeMap.get(i)).getType().equals("segment")) {
+					
+				}
+				else if((Shape)(shapeMap.get(i)).getType().equals("polyline")) {
+					
+				}
+			}
 			shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
 		}
 		// In moving mode, shift the object and keep track of where next step is from

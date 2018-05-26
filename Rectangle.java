@@ -13,6 +13,7 @@ public class Rectangle implements Shape {
 	// TODO: YOUR CODE HERE
 	Color color;
 	int x1, y1, x2, y2;
+	private String type = "rectangle";
 	
 	public Rectangle(int x1, int y1, Color color) {
 		this.x1 = x1; this.y1 = y1;
@@ -43,6 +44,10 @@ public class Rectangle implements Shape {
 		x1 += dx; x2 += dx;
 		y1 += dy; y2 += dy;
 		ensureCorrectBounds();
+	}
+	
+	public String getType() {
+		return type;
 	}
 
 	@Override
