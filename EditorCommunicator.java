@@ -1,4 +1,5 @@
 package ps6;
+import java.awt.Color;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
@@ -52,10 +53,35 @@ public class EditorCommunicator extends Thread {
 			String line;
 			while ((line = in.readLine()) != null) {
 				System.out.println("received:" + line);
-				String[] splitLine = line.split(" ");
-
-			}
+				String[] splitLine = line.split(",",3);
+				Integer id = Integer.getInteger(splitLine[0]);
+				String shape = splitLine[1];
+				// Put statments don't check to see if it is in the map
+				if(shape.equals("put")) {
+					editor.addToShapeMap(id, shape, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]), new Color(Integer.getInteger(splitLine[4])));
+					editor.repaint();
+				}
+				if(shape.equals("recolor")) {
+					editor.recolorKnownShape(id, new Color(Integer.getInteger(splitLine[2])));
+				}
+				else if(shape.equals("delete")) {
+					editor.deleteKnownShape(id);
+				}
+				else if(shape.equals("setCorners")) {
+					editor.updateKnownShapeCorners(id, shape, Integer.getInteger(splitLine[2]), 
+							Integer.getInteger(splitLine[3]), Integer.getInteger(splitLine[4]), Integer.getInteger(splitLine[5]));
+				}
+				else if(shape.equals("setEnd")) {
+					editor.updateKnownSegmentEnd(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				}
+				else if(shape.equals("addPoint")) {
+					editor.updateKnownPolylineEnd(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				}
+				else if(shape.equals("moveBy")) {
+					editor.updateKnownShapePosition(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				}
 			Thread.sleep(5000);
+			}
 		}
 		catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -63,9 +89,10 @@ public class EditorCommunicator extends Thread {
 		finally {
 			System.out.println("server hung up");
 		}
-	}	
+	}
 
 	// Send editor requests to the server
 	// TODO: YOUR CODE HERE
+//	send(something, this code isn't meant to work);
 	
 }

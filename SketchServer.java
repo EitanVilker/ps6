@@ -79,7 +79,7 @@ public class SketchServer {
 		while ((line = in.readLine()) != null) {
 			System.out.println("received:" + line);
 			String[] splitLine = line.split(",",3);
-			// put statments dont check to see if it is in the map
+			// Put statments don't check to see if it is in the map
 			if(splitLine[1].equals("put")) {
 				String[] commandLine = splitLine[3].split(",");
 				if(commandLine[0].equals("ellipse")) {
@@ -91,8 +91,10 @@ public class SketchServer {
 				} else if(commandLine[0].equals("polyline")) {
 					shapeMap.put(Integer.getInteger(splitLine[0]),new Polyline(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
 				}
-			} else if() {
+				broadcast(line);
 				
+			} else if(splitLine[1].equals("recolor")) {
+				shapeMap
 			}
 			
 			if(shapeMap.containsKey(splitLine[0])) {

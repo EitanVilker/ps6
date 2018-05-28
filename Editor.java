@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
 import javax.swing.*;
 
@@ -41,7 +44,7 @@ public class Editor extends JFrame {
 	private Shape curr = null;					// current shape (if any) being drawn
 	private Sketch sketch;						// holds and handles all the completed objects
 	private Integer movingId = -1;					// current shape id (if any; else -1) being moved
-	private Integer addingId = 0;
+	private static Integer addingId = 0;
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
 
@@ -186,11 +189,55 @@ public class Editor extends JFrame {
 	public void drawSketch(Graphics g) {
 		// TODO: YOUR CODE HERE
 		for(Object number: shapeMap.keySet()) {
-			((Shape)shapeMap.get(number)).draw(g);
+			shapeMap.get(number).draw(g);
 		}
 	}
 
 	// Helpers for event handlers
+	
+	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+		if(shape.equals("ellipse")) {
+			shapeMap.put(i, new Ellipse(x, y, color));
+		}
+		if(shape.equals("rectange")) {
+			shapeMap.put(i, new Rectangle(x, y, color));
+		}
+		if(shape.equals("segment")) {
+			shapeMap.put(i, new Segment(x, y, color));
+		}
+		if(shape.equals("polyline")) {
+			shapeMap.put(i, new Polyline(x, y, color));
+		}
+	}
+	
+	public void recolorKnownShape(Integer i, Color color) {
+		shapeMap.get(i).setColor(color);
+	}
+	
+	public void deleteKnownShape(Integer i) {
+		shapeMap.remove(i);
+	}
+	
+	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+		if(shape.equals("ellipse")) {
+			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+		}
+		if(shape.equals("rectangle")) {
+			((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+		}
+	}
+	
+	public void updateKnownSegmentEnd(Integer i, int x, int y) {
+		((Segment)(shapeMap.get(i))).setEnd(x, y);
+	}
+	
+	public void updateKnownPolylineEnd(Integer i, int x, int y) {
+		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+	}
+	
+	public void updateKnownShapePosition(Integer i, int x, int y) {
+		shapeMap.get(i).moveBy(x, y);
+	}
 	
 	/**
 	 * Helper method for press at point
@@ -210,7 +257,7 @@ public class Editor extends JFrame {
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
 				// moveFrom = p;
-				//handleDrag(p);
+				// handleDrag(p);
 			} else if(shapeType.equals("rectangle")) {
 				shapeMap.put(addingId, new Rectangle(p.x,p.y,color));
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
@@ -240,8 +287,8 @@ public class Editor extends JFrame {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					shapeMap.get(number).setColor(color);
-					comm.send(number+",recolor,"+color.getRGB());
 					// Write message to EditorCommunicator to change color
+					comm.send(number+",recolor,"+color.getRGB());
 				}
 			}
 		}
@@ -250,8 +297,8 @@ public class Editor extends JFrame {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					shapeMap.remove(number);
-					comm.send(number+",delete");
 					// Write message to EditorCommunicator to delete
+					comm.send(number+",delete");
 				}
 			}
 			moveFrom = null;
@@ -312,7 +359,7 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In moving mode, stop dragging the object
 		moveFrom = null;
-		if(mode == mode.DRAW) {
+		if(mode == Mode.DRAW) {
 			addingId++;
 		}
 		
