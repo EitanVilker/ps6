@@ -8,7 +8,6 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-import EditorOne.Mode;
 
 /**
  * Client-server graphical editor
@@ -41,8 +40,8 @@ public class Editor extends JFrame {
 	// these are remnants of my implementation; take them as possible suggestions or ignore them
 	private Shape curr = null;					// current shape (if any) being drawn
 	private Sketch sketch;						// holds and handles all the completed objects
-	private int movingId = -1;					// current shape id (if any; else -1) being moved
-	private int addingId = 0;
+	private Integer movingId = -1;					// current shape id (if any; else -1) being moved
+	private Integer addingId = 0;
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
 
@@ -178,7 +177,9 @@ public class Editor extends JFrame {
 	 */
 	public void drawSketch(Graphics g) {
 		// TODO: YOUR CODE HERE
-		
+		for(Object number: shapeMap.keySet()) {
+			((Shape)shapeMap.get(number)).draw(g);
+		}
 	}
 
 	// Helpers for event handlers
@@ -214,19 +215,35 @@ public class Editor extends JFrame {
 		
 		
 		// In moving mode, start dragging if clicked in the shape
-		if(mode == Mode.MOVE && shape.contains(p.x, p.y)) {
-			handleDrag(p);
+		if(mode == Mode.MOVE) {
+			for(Object number: shapeMap.keySet()) {
+				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+					handleDrag(new Point(p.x, p.y));
+				}
+			}
 		}
+		
 		// In recoloring mode, change the shape's color if clicked in it
-		if(mode == Mode.RECOLOR && shape.contains(p.x, p.y)) {
-			shape.setColor(color);
+		if(mode == Mode.RECOLOR) {
+			for(Object number: shapeMap.keySet()) {
+				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+					((Shape)shapeMap.get(number)).setColor(color);
+				
+					// Write message to EditorCommunicator to change color
+				}
+			}
 		}
 		// In deleting mode, delete the shape if clicked in it
-		if(mode == Mode.DELETE && shape.contains(p.x, p.y)) {
-			shape = null;
+		if(mode == Mode.DELETE) {
+			for(Object number: shapeMap.keySet()) {
+				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+					shapeMap.remove(number);
+					
+					// Write message to EditorCommunicator to delete
+				}
+			}
 			moveFrom = null;
 			drawFrom = null;
-			color = null;
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 		repaint();
@@ -255,36 +272,17 @@ public class Editor extends JFrame {
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("polyline")) {
 				((Polyline)(holdShape)).addPoint(p.x, p.y);
 			}
-			
-			
-			
-			//Iterator<Shape> itr = shapeMap.keySet().iterator();
-			//while(itr.hasNext()) {
-			//	Shape shape = itr.next();
-		//		String shapeType = shape.getType();
-		//		if(shapeType == "ellipse") {
-		//			Ellipse holdEllipse = (Ellipse)(shape);
-		//			holdEllipse.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
-
-		//		}
-		//		else if((Shape)(shapeMap.get(i)).getType().equals("rectangle")) {
-		//			
-		//		}
-		//		else if((Shape)(shapeMap.get(i)).getType().equals("segment")) {
-					
-		//		}
-		//		else if((Shape)(shapeMap.get(i)).getType().equals("polyline")) {
-					
-		//		}
-			//}
-			// shape.setCorners(drawFrom.x, drawFrom.y, moveFrom.x, moveFrom.y);
 		}
 		// In moving mode, shift the object and keep track of where next step is from
 		if(mode == Mode.MOVE) {
 			if(moveFrom == null) {
 				moveFrom = p;
 			}
-			shape.moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+			for(Object number: shapeMap.keySet()) {
+				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+					((Shape)shapeMap.get(number)).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+				}
+			}
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 		moveFrom = p;
@@ -301,7 +299,7 @@ public class Editor extends JFrame {
 		// In moving mode, stop dragging the object
 		moveFrom = null;
 		if(mode == mode.DRAW) {
-			addingId ++;
+			addingId++;
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
