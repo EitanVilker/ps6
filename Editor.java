@@ -26,7 +26,7 @@ public class Editor extends JFrame {
 	private static final int width = 800, height = 800;		// canvas size
 
 	//Goal of this map is to store the shapes crated with unique integers as keys.
-	private HashMap shapeMap = new HashMap<Integer, Shape>();
+	private HashMap<Integer,Shape> shapeMap = new HashMap<Integer, Shape>();
 	
 	// Current settings on GUI
 	public enum Mode {
@@ -48,7 +48,15 @@ public class Editor extends JFrame {
 
 	// Communication
 	private EditorCommunicator comm;			// communication with the sketch server
-
+	// sending format "i,command type,command"
+	// put format "shapeType,parameters"
+	// recolor format "color(int)"
+	// delete format empty
+	// setEnd format "x,y"
+	// addPoint format "x,y"
+	// moveBy format "dx,dy"
+	
+	
 	public Editor() {
 		super("Graphical Editor");
 
@@ -199,17 +207,21 @@ public class Editor extends JFrame {
 			if(shapeType.equals("ellipse")) {
 				// curr = new Ellipse(p.x, p.y, color);
 				shapeMap.put(addingId, new Ellipse(p.x, p.y, color));
+				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
 				// moveFrom = p;
 				//handleDrag(p);
 			} else if(shapeType.equals("rectangle")) {
 				shapeMap.put(addingId, new Rectangle(p.x,p.y,color));
+				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
 			} else if(shapeType.equals("segment")){
 				shapeMap.put(addingId, new Segment(p.x, p.y, color));
+				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
 			} else if(shapeType.equals("polyline")) {
 				shapeMap.put(addingId, new Polyline(p.x, p.y, color));
+				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 			}
 		}
 		
@@ -217,7 +229,7 @@ public class Editor extends JFrame {
 		// In moving mode, start dragging if clicked in the shape
 		if(mode == Mode.MOVE) {
 			for(Object number: shapeMap.keySet()) {
-				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+				if(shapeMap.get(number).contains(p.x, p.y)) {
 					handleDrag(new Point(p.x, p.y));
 				}
 			}
@@ -226,9 +238,9 @@ public class Editor extends JFrame {
 		// In recoloring mode, change the shape's color if clicked in it
 		if(mode == Mode.RECOLOR) {
 			for(Object number: shapeMap.keySet()) {
-				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
-					((Shape)shapeMap.get(number)).setColor(color);
-				
+				if(shapeMap.get(number).contains(p.x, p.y)) {
+					shapeMap.get(number).setColor(color);
+					comm.send(number+",recolor,"+color.getRGB());
 					// Write message to EditorCommunicator to change color
 				}
 			}
@@ -236,9 +248,9 @@ public class Editor extends JFrame {
 		// In deleting mode, delete the shape if clicked in it
 		if(mode == Mode.DELETE) {
 			for(Object number: shapeMap.keySet()) {
-				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
+				if(shapeMap.get(number).contains(p.x, p.y)) {
 					shapeMap.remove(number);
-					
+					comm.send(number+",delete");
 					// Write message to EditorCommunicator to delete
 				}
 			}
@@ -259,18 +271,19 @@ public class Editor extends JFrame {
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
 			Object holdShape = shapeMap.get(addingId);
-			if(((Shape)(shapeMap.get(addingId))).getType().equals("ellipse")) {
+			if(shapeMap.get(addingId).getType().equals("ellipse")) {
 				((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
-				
+				comm.send(addingId+",setCorners,"+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("rectangle")) {
 				Point topLeft = ((Rectangle)(holdShape)).getTopLeft();
 				((Rectangle)(holdShape)).setCorners(topLeft.x, topLeft.y, p.x, p.y);
-				
+				comm.send(addingId+",setCorners,"+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("segment")) {
 				((Segment)(holdShape)).setEnd(p.x, p.y);
-				
+				comm.send(addingId+",setEnd,"+p.x+","+p.y);
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("polyline")) {
 				((Polyline)(holdShape)).addPoint(p.x, p.y);
+				comm.send(addingId+",addPoint,"+p.x+","+p.y);
 			}
 		}
 		// In moving mode, shift the object and keep track of where next step is from
@@ -279,8 +292,9 @@ public class Editor extends JFrame {
 				moveFrom = p;
 			}
 			for(Object number: shapeMap.keySet()) {
-				if(((Shape)(shapeMap.get(number))).contains(p.x, p.y)) {
-					((Shape)shapeMap.get(number)).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+				if(shapeMap.get(number).contains(p.x, p.y)) {
+					shapeMap.get(number).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+					comm.send(number+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
 				}
 			}
 		}
@@ -301,6 +315,7 @@ public class Editor extends JFrame {
 		if(mode == mode.DRAW) {
 			addingId++;
 		}
+		
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 

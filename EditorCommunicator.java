@@ -40,7 +40,8 @@ public class EditorCommunicator extends Thread {
 	public void send(String msg) {
 		out.println(msg);
 	}
-
+	// key,command,command info
+	
 	/**
 	 * Keeps listening for and handling (your code) messages from the server
 	 */
@@ -56,7 +57,7 @@ public class EditorCommunicator extends Thread {
 			}
 			Thread.sleep(5000);
 		}
-		catch (IOException e) {
+		catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
 		finally {

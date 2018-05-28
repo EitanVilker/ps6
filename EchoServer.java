@@ -22,6 +22,7 @@ public class EchoServer {
     public EchoServer(ServerSocket listen) {
         this.listen = listen;
     }
+    public Sketch sketch = new Sketch();
 
     ///////////////////////////////////////////////////////////////////////
     

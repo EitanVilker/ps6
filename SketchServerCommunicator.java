@@ -42,7 +42,7 @@ public class SketchServerCommunicator extends Thread {
 
 			// Keep getting and handling messages from the client
 			// TODO: YOUR CODE HERE
-
+			
 			// Clean up -- note that also remove self from server's list so it doesn't broadcast here
 			server.removeCommunicator(this);
 			out.close();

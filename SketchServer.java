@@ -1,6 +1,7 @@
 package ps6;
 import java.net.*;
 import java.util.*;
+import java.awt.Color;
 import java.io.*;
 
 /**
@@ -77,7 +78,23 @@ public class SketchServer {
 		String line;
 		while ((line = in.readLine()) != null) {
 			System.out.println("received:" + line);
-			String[] splitLine = line.split(" ");
+			String[] splitLine = line.split(",",3);
+			// put statments dont check to see if it is in the map
+			if(splitLine[1].equals("put")) {
+				String[] commandLine = splitLine[3].split(",");
+				if(commandLine[0].equals("ellipse")) {
+					shapeMap.put(Integer.getInteger(splitLine[0]),new Ellipse(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
+				} else if(commandLine[0].equals("rectangle")) {
+					shapeMap.put(Integer.getInteger(splitLine[0]),new Rectangle(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
+				} else if(commandLine[0].equals("segment")) {
+					shapeMap.put(Integer.getInteger(splitLine[0]),new Segment(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
+				} else if(commandLine[0].equals("polyline")) {
+					shapeMap.put(Integer.getInteger(splitLine[0]),new Polyline(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
+				}
+			} else if() {
+				
+			}
+			
 			if(shapeMap.containsKey(splitLine[0])) {
 				if(shapeMap.get(splitLine[0]).getType().equals("ellipse")) {
 					out.println("hi! your word means: " + theDictionary.get(splitLine[1]));
