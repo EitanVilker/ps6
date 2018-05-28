@@ -48,6 +48,13 @@ public class EditorCommunicator extends Thread {
 		try {
 			// Handle messages
 			// TODO: YOUR CODE HERE
+			String line;
+			while ((line = in.readLine()) != null) {
+				System.out.println("received:" + line);
+				String[] splitLine = line.split(" ");
+
+			}
+			Thread.sleep(5000);
 		}
 		catch (IOException e) {
 			e.printStackTrace();

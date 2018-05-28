@@ -24,6 +24,8 @@ public class SketchServer {
 		return sketch;
 	}
 	
+	private static HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
+	
 	/**
 	 * The usual loop of accepting connections and firing off new threads to handle them
 	 */
@@ -62,5 +64,51 @@ public class SketchServer {
 	
 	public static void main(String[] args) throws Exception {
 		new SketchServer(new ServerSocket(4242)).getConnections();
+		System.out.println("waiting for someone to connect");
+		ServerSocket listen = new ServerSocket(4242);
+		// When someone connects, create a specific socket for them
+		Socket sock = listen.accept();
+		System.out.println("someone connected");
+
+		// Now talk with them
+		PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
+		BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+		out.println("Let's create a masterpiece!");
+		String line;
+		while ((line = in.readLine()) != null) {
+			System.out.println("received:" + line);
+			String[] splitLine = line.split(" ");
+			if(shapeMap.containsKey(splitLine[0])) {
+				if(shapeMap.get(splitLine[0]).getType().equals("ellipse")) {
+					out.println("hi! your word means: " + theDictionary.get(splitLine[1]));
+				}
+
+				else {
+					out.println("Try a real word next time, scrub.");
+				}
+
+			}
+			if(splitLine[0].equals("SET")) {
+				if(!splitLine[1].equals(null)) {
+					String tempString = "";
+					for(int i = 2; i < splitLine.length; i++) {
+						tempString += splitLine[i] + " ";
+					}
+ 					theDictionary.put(splitLine[1], tempString);
+					out.println("hi! your word means: " + theDictionary.get(splitLine[1]));
+				}
+ 				else {
+					out.println("Try a real word next time, scrub.");
+				}
+
+			}
+		}
+		System.out.println("client hung up");
+
+		// Clean up shop
+		out.close();
+		in.close();
+		sock.close();
+		listen.close();
 	}
 }
