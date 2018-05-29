@@ -100,9 +100,9 @@ public class Polyline implements Shape {
 	public String toString() {
 		String temp = "";
 		for(Point p: pointList) {
-			temp += "x: " + p.x + ", y: " + p.y;
+			temp += p.x + "," + p.y + ",";
 		}
-		return "PolyLine: " + temp + ", Color: " + color;
+		return "polyline," + temp + color;
 	}
 
 	@Override

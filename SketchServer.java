@@ -45,6 +45,16 @@ public class SketchServer {
 	 */
 	public synchronized void addCommunicator(SketchServerCommunicator comm) {
 		comms.add(comm);
+		for(Integer i: shapeMap.keySet()) {
+			Shape shape = shapeMap.get(i);
+			String[] shapeString = shape.toString().split(",");
+			if(shape.getType().equals("ellipse")){
+				comm.send(i+","+"put"+shape.getType()+","+shapeString[2]+","+shapeString[3]+","+shapeString[4]+","+shapeString[5]+","+shapeString[6]);
+			}
+			else if(shape.getType().equals("rectangle")){
+				comm.send(i+","+"put"+shape.getType()+","+shapeString[2]+","+shapeString[3]+","+shapeString[4]+","+shapeString[5]+","+shapeString[6]);
+			}
+		}
 	}
 
 	/**
@@ -63,6 +73,50 @@ public class SketchServer {
 		}
 	}
 	
+	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+		if(shape.equals("ellipse")) {
+			shapeMap.put(i, new Ellipse(x, y, color));
+		}
+		if(shape.equals("rectange")) {
+			shapeMap.put(i, new Rectangle(x, y, color));
+		}
+		if(shape.equals("segment")) {
+			shapeMap.put(i, new Segment(x, y, color));
+		}
+		if(shape.equals("polyline")) {
+			shapeMap.put(i, new Polyline(x, y, color));
+		}
+	}
+	
+	public void recolorKnownShape(Integer i, Color color) {
+		shapeMap.get(i).setColor(color);
+	}
+	
+	public void deleteKnownShape(Integer i) {
+		shapeMap.remove(i);
+	}
+	
+	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+		if(shape.equals("ellipse")) {
+			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+		}
+		if(shape.equals("rectangle")) {
+			((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+		}
+	}
+	
+	public void updateKnownSegmentEnd(Integer i, int x, int y) {
+		((Segment)(shapeMap.get(i))).setEnd(x, y);
+	}
+	
+	public void updateKnownPolylineEnd(Integer i, int x, int y) {
+		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+	}
+	
+	public void updateKnownShapePosition(Integer i, int x, int y) {
+		shapeMap.get(i).moveBy(x, y);
+	}
+	
 	public static void main(String[] args) throws Exception {
 		new SketchServer(new ServerSocket(4242)).getConnections();
 		System.out.println("waiting for someone to connect");
@@ -75,53 +129,7 @@ public class SketchServer {
 		PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
 		BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		out.println("Let's create a masterpiece!");
-		String line;
-		while ((line = in.readLine()) != null) {
-			System.out.println("received:" + line);
-			String[] splitLine = line.split(",",3);
-			// Put statments don't check to see if it is in the map
-			if(splitLine[1].equals("put")) {
-				String[] commandLine = splitLine[3].split(",");
-				if(commandLine[0].equals("ellipse")) {
-					shapeMap.put(Integer.getInteger(splitLine[0]),new Ellipse(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
-				} else if(commandLine[0].equals("rectangle")) {
-					shapeMap.put(Integer.getInteger(splitLine[0]),new Rectangle(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
-				} else if(commandLine[0].equals("segment")) {
-					shapeMap.put(Integer.getInteger(splitLine[0]),new Segment(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
-				} else if(commandLine[0].equals("polyline")) {
-					shapeMap.put(Integer.getInteger(splitLine[0]),new Polyline(Integer.getInteger(commandLine[1]),Integer.getInteger(commandLine[2]),new Color(Integer.getInteger(commandLine[3]))));
-				}
-				broadcast(line);
-				
-			} else if(splitLine[1].equals("recolor")) {
-				shapeMap
-			}
-			
-			if(shapeMap.containsKey(splitLine[0])) {
-				if(shapeMap.get(splitLine[0]).getType().equals("ellipse")) {
-					out.println("hi! your word means: " + theDictionary.get(splitLine[1]));
-				}
-
-				else {
-					out.println("Try a real word next time, scrub.");
-				}
-
-			}
-			if(splitLine[0].equals("SET")) {
-				if(!splitLine[1].equals(null)) {
-					String tempString = "";
-					for(int i = 2; i < splitLine.length; i++) {
-						tempString += splitLine[i] + " ";
-					}
- 					theDictionary.put(splitLine[1], tempString);
-					out.println("hi! your word means: " + theDictionary.get(splitLine[1]));
-				}
- 				else {
-					out.println("Try a real word next time, scrub.");
-				}
-
-			}
-		}
+		
 		System.out.println("client hung up");
 
 		// Clean up shop

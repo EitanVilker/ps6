@@ -51,13 +51,17 @@ public class Editor extends JFrame {
 
 	// Communication
 	private EditorCommunicator comm;			// communication with the sketch server
+	
 	// sending format "i,command type,command"
-	// put format "shapeType,parameters"
+	// put format "shapeType,parameter 1, 2"
+	// put format "shapeType,parameter 1, 2, 3, 4"
 	// recolor format "color(int)"
 	// delete format empty
 	// setEnd format "x,y"
 	// addPoint format "x,y"
 	// moveBy format "dx,dy"
+	// 		return "rectangle,"+x1+","+y1+","+x2+","+y2+","+color;
+
 	
 	
 	public Editor() {
@@ -68,6 +72,7 @@ public class Editor extends JFrame {
 		// Connect to server
 		comm = new EditorCommunicator(serverIP, this);
 		comm.start();
+		comm.send("Let's get this party started");
 
 		// Helpers to create the canvas and GUI (buttons, etc.)
 		JComponent canvas = setupCanvas();
@@ -199,44 +204,68 @@ public class Editor extends JFrame {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
-		if(shape.equals("rectange")) {
+		else if(shape.equals("rectange")) {
 			shapeMap.put(i, new Rectangle(x, y, color));
 		}
-		if(shape.equals("segment")) {
+		else if(shape.equals("segment")) {
 			shapeMap.put(i, new Segment(x, y, color));
 		}
-		if(shape.equals("polyline")) {
+		else if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
 		}
+		repaint();
+	}
+	
+	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
+		if(shape.equals("ellipse")) {
+			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
+		}
+		else if(shape.equals("rectange")) {
+			shapeMap.put(i, new Rectangle(x1, y1,x2, y2, color));
+		}
+		else if(shape.equals("segment")) {
+			shapeMap.put(i, new Segment(x1, y1, x2, y2, color));
+		}
+		else if(shape.equals("polyline")) {
+			shapeMap.put(i, new Polyline(x1, y1, color));
+			((Polyline) shapeMap.get(i)).addPoint(x2, y2);
+		}
+		repaint();
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
 		shapeMap.get(i).setColor(color);
+		repaint();
 	}
 	
 	public void deleteKnownShape(Integer i) {
 		shapeMap.remove(i);
+		repaint();
 	}
 	
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
 		if(shape.equals("ellipse")) {
 			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
-		if(shape.equals("rectangle")) {
+		else if(shape.equals("rectangle")) {
 			((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
+		repaint();
 	}
 	
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
 		((Segment)(shapeMap.get(i))).setEnd(x, y);
+		repaint();
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
 		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+		repaint();
 	}
 	
 	public void updateKnownShapePosition(Integer i, int x, int y) {
 		shapeMap.get(i).moveBy(x, y);
+		repaint();
 	}
 	
 	/**

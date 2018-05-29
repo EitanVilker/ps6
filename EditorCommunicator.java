@@ -53,15 +53,19 @@ public class EditorCommunicator extends Thread {
 			String line;
 			while ((line = in.readLine()) != null) {
 				System.out.println("received:" + line);
-				String[] splitLine = line.split(",",3);
+				String[] splitLine = line.split(",");
 				Integer id = Integer.getInteger(splitLine[0]);
 				String shape = splitLine[1];
 				// Put statments don't check to see if it is in the map
 				if(shape.equals("put")) {
-					editor.addToShapeMap(id, shape, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]), new Color(Integer.getInteger(splitLine[4])));
-					editor.repaint();
+					if(splitLine[5].equals(null)) {
+						editor.addToShapeMap(id, shape, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]), new Color(Integer.getInteger(splitLine[4])));
+					}
+					else {
+						editor.addToShapeMap(i, shape, x, y, color);
+					}
 				}
-				if(shape.equals("recolor")) {
+				else if(shape.equals("recolor")) {
 					editor.recolorKnownShape(id, new Color(Integer.getInteger(splitLine[2])));
 				}
 				else if(shape.equals("delete")) {
