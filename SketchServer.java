@@ -1,4 +1,3 @@
-package ps6;
 import java.net.*;
 import java.util.*;
 import java.awt.Color;
@@ -25,7 +24,7 @@ public class SketchServer {
 		return sketch;
 	}
 	
-	private static HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
+	private HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
 	
 	/**
 	 * The usual loop of accepting connections and firing off new threads to handle them
@@ -46,14 +45,7 @@ public class SketchServer {
 	public synchronized void addCommunicator(SketchServerCommunicator comm) {
 		comms.add(comm);
 		for(Integer i: shapeMap.keySet()) {
-			Shape shape = shapeMap.get(i);
-			String[] shapeString = shape.toString().split(",");
-			if(shape.getType().equals("ellipse")){
-				comm.send(i+","+"put"+shape.getType()+","+shapeString[2]+","+shapeString[3]+","+shapeString[4]+","+shapeString[5]+","+shapeString[6]);
-			}
-			else if(shape.getType().equals("rectangle")){
-				comm.send(i+","+"put"+shape.getType()+","+shapeString[2]+","+shapeString[3]+","+shapeString[4]+","+shapeString[5]+","+shapeString[6]);
-			}
+			comm.send(i+","+"put"+shapeMap.get(i).toString());
 		}
 	}
 
@@ -110,7 +102,7 @@ public class SketchServer {
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
 	}
 	
 	public void updateKnownShapePosition(Integer i, int x, int y) {
@@ -119,23 +111,6 @@ public class SketchServer {
 	
 	public static void main(String[] args) throws Exception {
 		new SketchServer(new ServerSocket(4242)).getConnections();
-		System.out.println("waiting for someone to connect");
-		ServerSocket listen = new ServerSocket(4242);
-		// When someone connects, create a specific socket for them
-		Socket sock = listen.accept();
-		System.out.println("someone connected");
 
-		// Now talk with them
-		PrintWriter out = new PrintWriter(sock.getOutputStream(), true);
-		BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		out.println("Let's create a masterpiece!");
-		
-		System.out.println("client hung up");
-
-		// Clean up shop
-		out.close();
-		in.close();
-		sock.close();
-		listen.close();
 	}
 }

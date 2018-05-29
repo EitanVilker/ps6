@@ -1,4 +1,3 @@
-package ps6;
 import java.util.HashMap;
 
 public class Sketch {

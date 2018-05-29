@@ -1,4 +1,3 @@
-package ps6;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,9 +41,9 @@ public class Editor extends JFrame {
 	// Drawing state
 	// these are remnants of my implementation; take them as possible suggestions or ignore them
 	private Shape curr = null;					// current shape (if any) being drawn
-	private Sketch sketch;						// holds and handles all the completed objects
-	private Integer movingId = -1;					// current shape id (if any; else -1) being moved
-	private static Integer addingId = 0;
+//	private Sketch sketch;						// holds and handles all the completed objects
+	private Integer movingId = -1;				// current shape id (if any; else -1) being moved
+	private Integer addingId = 0;
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
 
@@ -57,6 +56,7 @@ public class Editor extends JFrame {
 	// put format "shapeType,parameter 1, 2, 3, 4"
 	// recolor format "color(int)"
 	// delete format empty
+	// setCorners format 
 	// setEnd format "x,y"
 	// addPoint format "x,y"
 	// moveBy format "dx,dy"
@@ -67,12 +67,11 @@ public class Editor extends JFrame {
 	public Editor() {
 		super("Graphical Editor");
 
-		sketch = new Sketch();
+//		sketch = new Sketch();
 
 		// Connect to server
 		comm = new EditorCommunicator(serverIP, this);
 		comm.start();
-		comm.send("Let's get this party started");
 
 		// Helpers to create the canvas and GUI (buttons, etc.)
 		JComponent canvas = setupCanvas();
@@ -110,13 +109,18 @@ public class Editor extends JFrame {
 			}
 
 			public void mouseReleased(MouseEvent event) {
-				handleRelease();
+				handleRelease(event.getX(), event.getY());
 			}
 		});		
 
 		canvas.addMouseMotionListener(new MouseAdapter() {
 			public void mouseDragged(MouseEvent event) {
-				handleDrag(event.getPoint());
+				try {
+					handleDrag(event.getPoint());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 		
@@ -180,12 +184,12 @@ public class Editor extends JFrame {
 		return gui;
 	}
 
-	/**
-	 * Getter for the sketch instance variable
-	 */
-	public Sketch getSketch() {
-		return sketch;
-	}
+//	/**
+//	 * Getter for the sketch instance variable
+//	 */
+//	public Sketch getSketch() {
+//		return sketch;
+//	}
 
 	/**
 	 * Draws all the shapes in the sketch,
@@ -204,15 +208,21 @@ public class Editor extends JFrame {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
-		else if(shape.equals("rectange")) {
+		else if(shape.equals("rectangle")) {
 			shapeMap.put(i, new Rectangle(x, y, color));
 		}
 		else if(shape.equals("segment")) {
-			shapeMap.put(i, new Segment(x, y, color));
+			Segment seg = new Segment(x, y, color);
+			shapeMap.put(i, seg);
+			
 		}
 		else if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
+		} 
+		else {
+			System.out.println("weird shape:"+shape);
 		}
+		System.out.println(shapeMap);
 		repaint();
 	}
 	
@@ -259,7 +269,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
 		repaint();
 	}
 	
@@ -281,22 +291,20 @@ public class Editor extends JFrame {
 		// In drawing mode, start drawing a new shape
 		if(mode == Mode.DRAW) {
 			if(shapeType.equals("ellipse")) {
-				// curr = new Ellipse(p.x, p.y, color);
-				shapeMap.put(addingId, new Ellipse(p.x, p.y, color));
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
-				// moveFrom = p;
-				// handleDrag(p);
+
 			} else if(shapeType.equals("rectangle")) {
-				shapeMap.put(addingId, new Rectangle(p.x,p.y,color));
+				//shapeMap.put(addingId, new Rectangle(p.x,p.y,color));
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
+				
 			} else if(shapeType.equals("segment")){
-				shapeMap.put(addingId, new Segment(p.x, p.y, color));
+				
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 				drawFrom = p;
 			} else if(shapeType.equals("polyline")) {
-				shapeMap.put(addingId, new Polyline(p.x, p.y, color));
+				//shapeMap.put(addingId, new Polyline(p.x, p.y, color));
 				comm.send(addingId+",put,"+shapeType+","+p.x+","+p.y+","+color.getRGB());
 			}
 		}
@@ -304,9 +312,16 @@ public class Editor extends JFrame {
 		
 		// In moving mode, start dragging if clicked in the shape
 		if(mode == Mode.MOVE) {
-			for(Object number: shapeMap.keySet()) {
-				if(shapeMap.get(number).contains(p.x, p.y)) {
-					handleDrag(new Point(p.x, p.y));
+			for(Integer i: shapeMap.keySet()) {
+				if(shapeMap.get(i).contains(p.x, p.y)) {
+					movingId = i;
+//					try {
+//						handleDrag(new Point(p.x, p.y));
+//					} 
+//					catch (Exception e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 				}
 			}
 		}
@@ -325,7 +340,7 @@ public class Editor extends JFrame {
 		if(mode == Mode.DELETE) {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
-					shapeMap.remove(number);
+					//shapeMap.remove(number);
 					// Write message to EditorCommunicator to delete
 					comm.send(number+",delete");
 				}
@@ -342,24 +357,24 @@ public class Editor extends JFrame {
 	 * In drawing mode, update the other corner of the object;
 	 * in moving mode, (request to) drag the object
 	 */
-	private void handleDrag(Point p) {
+	private void handleDrag(Point p) throws Exception {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
-			Object holdShape = shapeMap.get(addingId);
+			Shape holdShape = shapeMap.get(addingId);
+			System.out.println(shapeMap.get(addingId));
 			if(shapeMap.get(addingId).getType().equals("ellipse")) {
-				((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
-				comm.send(addingId+",setCorners,"+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
+				//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
+				comm.send(addingId+",setCorners,"+shapeType+","+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("rectangle")) {
-				Point topLeft = ((Rectangle)(holdShape)).getTopLeft();
-				((Rectangle)(holdShape)).setCorners(topLeft.x, topLeft.y, p.x, p.y);
-				comm.send(addingId+",setCorners,"+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
+				comm.send(addingId+",setCorners,"+shapeType+","+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
+				
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("segment")) {
-				((Segment)(holdShape)).setEnd(p.x, p.y);
+				//((Segment)(holdShape)).setEnd(p.x, p.y);
 				comm.send(addingId+",setEnd,"+p.x+","+p.y);
 			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("polyline")) {
-				((Polyline)(holdShape)).addPoint(p.x, p.y);
-				comm.send(addingId+",addPoint,"+p.x+","+p.y);
+				//((Polyline)(holdShape)).updateLastPoint(p.x, p.y);
+				comm.send(addingId+",updateLastPoint,"+p.x+","+p.y);
 			}
 		}
 		// In moving mode, shift the object and keep track of where next step is from
@@ -367,12 +382,13 @@ public class Editor extends JFrame {
 			if(moveFrom == null) {
 				moveFrom = p;
 			}
-			for(Object number: shapeMap.keySet()) {
-				if(shapeMap.get(number).contains(p.x, p.y)) {
-					shapeMap.get(number).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
-					comm.send(number+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
-				}
-			}
+			shapeMap.get(movingId).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+//			for(Object number: shapeMap.keySet()) {
+//				if(shapeMap.get(number).contains(p.x, p.y)) {
+//					shapeMap.get(number).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+//					comm.send(number+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
+//				}
+//			}
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 		moveFrom = p;
@@ -384,14 +400,18 @@ public class Editor extends JFrame {
 	 * In drawing mode, pass the add new object request on to the server;
 	 * in moving mode, release it		
 	 */
-	private void handleRelease() {
+	private void handleRelease(int x, int y) {
 		// TODO: YOUR CODE HERE
 		// In moving mode, stop dragging the object
 		moveFrom = null;
 		if(mode == Mode.DRAW) {
+			if(shapeMap.get(addingId).getType().equals("polyline")) {
+				((Polyline)shapeMap.get(addingId)).addPoint(x, y);
+			}
+			System.out.println("addingID: " + addingId + "; shapeType: " + shapeMap.get(addingId).getType());
 			addingId++;
 		}
-		
+		drawFrom = null;
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 

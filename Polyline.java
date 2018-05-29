@@ -1,4 +1,3 @@
-package ps6;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -53,6 +52,10 @@ public class Polyline implements Shape {
 	
 	public void addPoint(int x, int y) {
 		pointList.add(new Point(x, y));
+	}
+	
+	public void updateLastPoint(int x, int y) {
+		pointList.set(pointList.size() - 1, new Point(x, y));
 	}
 	
 	/**

@@ -1,4 +1,3 @@
-package ps6;
 import java.awt.Color;
 import java.io.*;
 import java.net.Socket;
@@ -22,6 +21,7 @@ public class EditorCommunicator extends Thread {
 	 */
 	public EditorCommunicator(String serverIP, Editor editor) {
 		this.editor = editor;
+		
 		System.out.println("connecting to " + serverIP + "...");
 		try {
 			Socket sock = new Socket(serverIP, 4242);
@@ -47,48 +47,70 @@ public class EditorCommunicator extends Thread {
 	 * Keeps listening for and handling (your code) messages from the server
 	 */
 	public void run() {
+		System.out.println("run begun");
 		try {
+			System.out.println("there is indeed a try");
 			// Handle messages
 			// TODO: YOUR CODE HERE
+			Thread.sleep(2000);
 			String line;
 			while ((line = in.readLine()) != null) {
 				System.out.println("received:" + line);
 				String[] splitLine = line.split(",");
-				Integer id = Integer.getInteger(splitLine[0]);
-				String shape = splitLine[1];
+				Integer id = Integer.valueOf(splitLine[0]);
+				String command = splitLine[1];
 				// Put statments don't check to see if it is in the map
-				if(shape.equals("put")) {
-					if(splitLine[5].equals(null)) {
-						editor.addToShapeMap(id, shape, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]), new Color(Integer.getInteger(splitLine[4])));
+				if(command.equals("put")) {
+					String shape = splitLine[2];
+					System.out.println(splitLine.length);
+					if(splitLine.length == 6) {
+						System.out.println("inside");
+						System.out.println(id);
+						System.out.println(shape);
+						System.out.println(splitLine[3]);
+						System.out.println(splitLine[4]);
+						System.out.println(splitLine[5]);
+						
+						editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 					}
 					else {
-						editor.addToShapeMap(i, shape, x, y, color);
+						editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
+								Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
 					}
+					System.out.println("added");
 				}
-				else if(shape.equals("recolor")) {
-					editor.recolorKnownShape(id, new Color(Integer.getInteger(splitLine[2])));
+				else if(command.equals("recolor")) {
+					editor.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
 				}
-				else if(shape.equals("delete")) {
+				else if(command.equals("delete")) {
 					editor.deleteKnownShape(id);
 				}
-				else if(shape.equals("setCorners")) {
-					editor.updateKnownShapeCorners(id, shape, Integer.getInteger(splitLine[2]), 
-							Integer.getInteger(splitLine[3]), Integer.getInteger(splitLine[4]), Integer.getInteger(splitLine[5]));
+				else if(command.equals("setCorners")) {
+					System.out.println("setting corners");
+					editor.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
+							Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
 				}
-				else if(shape.equals("setEnd")) {
-					editor.updateKnownSegmentEnd(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				else if(command.equals("setEnd")) {
+					editor.updateKnownSegmentEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
-				else if(shape.equals("addPoint")) {
-					editor.updateKnownPolylineEnd(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				else if(command.equals("updateLastPoint")) {
+					editor.updateKnownPolylineEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
-				else if(shape.equals("moveBy")) {
-					editor.updateKnownShapePosition(id, Integer.getInteger(splitLine[2]), Integer.getInteger(splitLine[3]));
+				else if(command.equals("moveBy")) {
+					editor.updateKnownShapePosition(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
-			Thread.sleep(5000);
+			
+			//Thread.sleep(5000);
 			}
 		}
-		catch (IOException | InterruptedException e) {
+		catch (Exception e) {
 			e.printStackTrace();
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		finally {
 			System.out.println("server hung up");
@@ -97,6 +119,8 @@ public class EditorCommunicator extends Thread {
 
 	// Send editor requests to the server
 	// TODO: YOUR CODE HERE
-//	send(something, this code isn't meant to work);
+	/*
+	 * send received messages to server
+	 */
 	
 }
