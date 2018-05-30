@@ -1,4 +1,4 @@
-//package ps6; // coment out
+package ps6; // coment out
 
 import java.awt.Color;
 import java.io.*;
@@ -41,7 +41,14 @@ public class SketchServerCommunicator extends Thread {
 
 			// Tell the client the current state of the world
 			// TODO: YOUR CODE HERE
-			
+			if(!server.isEmpty()) {
+				String[] holdState = server.getWorldState().split("/n");
+				for(int i=0; i<holdState.length;i++) {
+					out.println(holdState[i]);
+					System.out.println(holdState[i]);
+				}
+								
+			}
 			// Keep getting and handling messages from the client
 			// TODO: YOUR CODE HERE
 			String line;
@@ -49,18 +56,23 @@ public class SketchServerCommunicator extends Thread {
 				System.out.println("received:" + line);
 				String[] splitLine = line.split(",");
 				Integer id = Integer.valueOf(splitLine[0]);
+				if (id == -1) {
+					id = server.getAddingId();
+					System.out.println("new id:" + id);
+					
+				}
 				String command = splitLine[1];
 				// Put statments don't check to see if it is in the map
 				if(command.equals("put")) {
 					String shape = splitLine[2];
-					System.out.println(splitLine.length);
+//					System.out.println(splitLine.length);
 					if(splitLine.length == 6) {
-						System.out.println("inside");
-						System.out.println(id);
-						System.out.println(shape);
-						System.out.println(splitLine[3]);
-						System.out.println(splitLine[4]);
-						System.out.println(splitLine[5]);
+//						System.out.println("inside");
+//						System.out.println(id);
+//						System.out.println(shape);
+//						System.out.println(splitLine[3]);
+//						System.out.println(splitLine[4]);
+//						System.out.println(splitLine[5]);
 						
 						server.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 					}
@@ -77,7 +89,7 @@ public class SketchServerCommunicator extends Thread {
 					server.deleteKnownShape(id);
 				}
 				else if(command.equals("setCorners")) {
-					System.out.println("setting corners");
+					//System.out.println("setting corners");
 					server.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
 							Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
 				}
@@ -89,6 +101,10 @@ public class SketchServerCommunicator extends Thread {
 				}
 				else if(command.equals("moveBy")) {
 					server.updateKnownShapePosition(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
+				}
+				line = id.toString();
+				for(int i=1; i< splitLine.length; i++) {
+					line += ","+splitLine[i];
 				}
 				server.broadcast(line);
 			}

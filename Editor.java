@@ -1,4 +1,4 @@
-//package ps6; // comment this out before pushing
+package ps6; // comment this out before pushing
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,10 +46,10 @@ public class Editor extends JFrame {
 	private Shape curr = null;					// current shape (if any) being drawn
 //	private Sketch sketch;						// holds and handles all the completed objects
 	private Integer movingId = -1;				// current shape id (if any; else -1) being moved
-	private Integer addingId = 0;				// current shape id (if any; else -1) being moved
+	private Integer addingId = -1;				// current shape id (if any; else -1) being moved
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
-
+	private static boolean canDraw = true;
 
 	// Communication
 	private EditorCommunicator comm;			// communication with the sketch server
@@ -197,14 +197,22 @@ public class Editor extends JFrame {
 	 */
 	public void drawSketch(Graphics g) {
 		// TODO: YOUR CODE HERE
-		for(Integer number: shapeMap.keySet()) {
-			shapeMap.get(number).draw(g);
+		try {
+			if(canDraw) {
+				for(Integer number: shapeMap.keySet()) {
+					shapeMap.get(number).draw(g);
+				}
+			}
+		} catch (Exception e) {
+			// do nothing will be fixed in a millisecond
 		}
 	}
 
 	// Helpers for event handlers
 	
-	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+	public synchronized void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+		canDraw = false;
+		
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
@@ -224,9 +232,17 @@ public class Editor extends JFrame {
 		}
 		repaint();
 		addingId = i;
+		canDraw = true;
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
+		canDraw = false;
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
 		}
@@ -242,6 +258,7 @@ public class Editor extends JFrame {
 		}
 		repaint();
 		addingId = i;
+		canDraw = true;
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
@@ -250,11 +267,14 @@ public class Editor extends JFrame {
 	}
 	
 	public void deleteKnownShape(Integer i) {
+		canDraw = false;
 		shapeMap.remove(i);
 		repaint();
+		canDraw = true;
 	}
 	
-	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+	public synchronized void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+		canDraw = false;
 		if(shape.equals("ellipse")) {
 			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
@@ -262,6 +282,7 @@ public class Editor extends JFrame {
 			((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
 		repaint();
+		canDraw = true;
 	}
 	
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
@@ -360,7 +381,8 @@ public class Editor extends JFrame {
 			if(moveFrom == null) {
 				moveFrom = p;
 			}
-			shapeMap.get(movingId).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
+			comm.send(movingId+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
+			//shapeMap.get(movingId).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
 //			for(Object number: shapeMap.keySet()) {
 //				if(shapeMap.get(number).contains(p.x, p.y)) {
 //					shapeMap.get(number).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
@@ -382,13 +404,13 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In moving mode, stop dragging the object
 		moveFrom = null;
-		System.out.println("Release engaged");
+		//System.out.println("Release engaged");
 		if(mode == Mode.DRAW) {
-			System.out.println("addingID: " + addingId + "; shapeType: " + shapeMap.get(addingId).getType());
+			//System.out.println("addingID: " + addingId + "; shapeType: " + shapeMap.get(addingId).getType());
 			//addingId++;
 		}
 		drawFrom = null;
-		movingId = 0;
+		movingId = -1;
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 

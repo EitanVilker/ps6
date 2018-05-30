@@ -1,4 +1,4 @@
-//package ps6; // coment out
+package ps6; // coment out
 
 import java.net.*;
 import java.util.*;
@@ -24,14 +24,14 @@ public class SketchServer {
 		comms = new ArrayList<SketchServerCommunicator>();
 	}
 	
-	public void printAtWill() {
-		System.out.println("WHERE IS MY WALRUS?");
-	}
+//	public void printAtWill() {
+//		System.out.println("WHERE IS MY WALRUS?");
+//	}
 
 	public Sketch getSketch() {
 		return sketch;
 	}
-	public int getAddingId() {
+	public synchronized int getAddingId() {
 		addingId++;
 		//System.out.println("this is the adding Id" + addingId);
 		return addingId;
@@ -52,13 +52,14 @@ public class SketchServer {
 			addCommunicator(comm);
 		}
 	}
-	public String getWorldState() {
+	public synchronized String getWorldState() {
 		String hold = "";
 		for(Integer i: shapeMap.keySet()) {
-			hold += i+","+"put"+shapeMap.get(i).toString() +"/n";
+			hold += i+","+"put,"+shapeMap.get(i).toString() +"/n";
 		}
 		return hold;
 	}
+	
 	public Boolean isEmpty() {
 		return shapeMap.isEmpty();
 	}
@@ -89,7 +90,7 @@ public class SketchServer {
 		}
 	}
 	
-	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+	public synchronized void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
@@ -104,7 +105,7 @@ public class SketchServer {
 		}
 	}
 	
-	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
+	public synchronized void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
 		}
@@ -120,15 +121,15 @@ public class SketchServer {
 		}
 	}
 	
-	public void recolorKnownShape(Integer i, Color color) {
+	public synchronized void recolorKnownShape(Integer i, Color color) {
 		shapeMap.get(i).setColor(color);
 	}
 	
-	public void deleteKnownShape(Integer i) {
+	public synchronized void deleteKnownShape(Integer i) {
 		shapeMap.remove(i);
 	}
 	
-	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+	public synchronized void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
 		if(shape.equals("ellipse")) {
 			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
@@ -137,15 +138,15 @@ public class SketchServer {
 		}
 	}
 	
-	public void updateKnownSegmentEnd(Integer i, int x, int y) {
+	public synchronized void updateKnownSegmentEnd(Integer i, int x, int y) {
 		((Segment)(shapeMap.get(i))).setEnd(x, y);
 	}
 	
-	public void updateKnownPolylineEnd(Integer i, int x, int y) {
+	public synchronized void updateKnownPolylineEnd(Integer i, int x, int y) {
 		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
 	}
 	
-	public void updateKnownShapePosition(Integer i, int x, int y) {
+	public synchronized void updateKnownShapePosition(Integer i, int x, int y) {
 		shapeMap.get(i).moveBy(x, y);
 	}
 	

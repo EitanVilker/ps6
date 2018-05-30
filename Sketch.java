@@ -1,4 +1,4 @@
-//package ps6; // cometn out
+package ps6; // cometn out
 
 import java.awt.Color;
 import java.awt.Point;
@@ -17,11 +17,11 @@ public class Sketch {
 		return subShapeMap;
 	}
 	
-	public static void drawNewMessage(EditorCommunicator comm, String shape, Point p, Color color) {
+	public synchronized static void drawNewMessage(EditorCommunicator comm, String shape, Point p, Color color) {
 		comm.send(-1+",put,"+shape+","+p.x+","+p.y+","+color.getRGB());
 	}
 	
-	public static void drawDragMessage(EditorCommunicator comm, int addingId, String type, Point p, Point drawFrom) {
+	public synchronized static void drawDragMessage(EditorCommunicator comm, int addingId, String type, Point p, Point drawFrom) {
 		if((type.equals("ellipse"))) {
 			comm.send(addingId+",setCorners,"+type+","+drawFrom.x+","+drawFrom.y+","+p.x+","+p.y);
 		}
@@ -31,7 +31,7 @@ public class Sketch {
 		else if((type.equals("segment"))) {
 			comm.send(addingId+",setEnd,"+p.x+","+p.y);
 		}
-		else if((type.equals("segment"))) {
+		else if((type.equals("polyLine"))) {
 			comm.send(addingId+",updateLastPoint,"+p.x+","+p.y);
 		}
 	}

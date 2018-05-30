@@ -1,4 +1,4 @@
-//package ps6; // coment out
+package ps6; // coment out
 
 import java.io.BufferedReader;
 import java.io.IOException;
