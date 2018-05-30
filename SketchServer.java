@@ -15,15 +15,26 @@ public class SketchServer {
 	private ServerSocket listen;						// for accepting connections
 	private ArrayList<SketchServerCommunicator> comms;	// all the connections with clients
 	private Sketch sketch;								// the state of the world
+	private int addingId = -1;
 	
 	public SketchServer(ServerSocket listen) {
+		System.out.println("Server dinosaur");
 		this.listen = listen;
 		sketch = new Sketch();
 		comms = new ArrayList<SketchServerCommunicator>();
 	}
+	
+	public void printAtWill() {
+		System.out.println("WHERE IS MY WALRUS?");
+	}
 
 	public Sketch getSketch() {
 		return sketch;
+	}
+	public int getAddingId() {
+		addingId++;
+		//System.out.println("this is the adding Id" + addingId);
+		return addingId;
 	}
 	
 	private HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
@@ -36,19 +47,30 @@ public class SketchServer {
 		while (true) {
 			SketchServerCommunicator comm = new SketchServerCommunicator(listen.accept(), this);
 			comm.setDaemon(true);
+			System.out.println("start");
 			comm.start();
 			addCommunicator(comm);
 		}
 	}
-
+	public String getWorldState() {
+		String hold = "";
+		for(Integer i: shapeMap.keySet()) {
+			hold += i+","+"put"+shapeMap.get(i).toString() +"/n";
+		}
+		return hold;
+	}
+	public Boolean isEmpty() {
+		return shapeMap.isEmpty();
+	}
 	/**
 	 * Adds the communicator to the list of current communicators
 	 */
 	public synchronized void addCommunicator(SketchServerCommunicator comm) {
 		comms.add(comm);
-		for(Integer i: shapeMap.keySet()) {
-			comm.send(i+","+"put"+shapeMap.get(i).toString());
-		}
+//		for(Integer i: shapeMap.keySet()) {
+//			comm.send(i+","+"put"+shapeMap.get(i).toString());
+//			System.out.println("addding new client");
+//		}
 	}
 
 	/**
@@ -71,7 +93,7 @@ public class SketchServer {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
-		if(shape.equals("rectange")) {
+		if(shape.equals("rectangle")) {
 			shapeMap.put(i, new Rectangle(x, y, color));
 		}
 		if(shape.equals("segment")) {
@@ -81,11 +103,12 @@ public class SketchServer {
 			shapeMap.put(i, new Polyline(x, y, color));
 		}
 	}
+	
 	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
 		}
-		else if(shape.equals("rectange")) {
+		else if(shape.equals("rectangle")) {
 			shapeMap.put(i, new Rectangle(x1, y1,x2, y2, color));
 		}
 		else if(shape.equals("segment")) {

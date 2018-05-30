@@ -54,24 +54,24 @@ public class EditorCommunicator extends Thread {
 			System.out.println("there is indeed a try");
 			// Handle messages
 			// TODO: YOUR CODE HERE
-			Thread.sleep(2000);
+			//Thread.sleep(2000);
 			String line;
 			while ((line = in.readLine()) != null) {
-				System.out.println("received:" + line);
+				//System.out.println("received:" + line);
 				String[] splitLine = line.split(",");
 				Integer id = Integer.valueOf(splitLine[0]);
 				String command = splitLine[1];
 				// Put statments don't check to see if it is in the map
 				if(command.equals("put")) {
 					String shape = splitLine[2];
-					System.out.println(splitLine.length);
+					// System.out.println(splitLine.length);
 					if(splitLine.length == 6) {
-						System.out.println("inside");
-						System.out.println(id);
-						System.out.println(shape);
-						System.out.println(splitLine[3]);
-						System.out.println(splitLine[4]);
-						System.out.println(splitLine[5]);
+//						System.out.println("inside");
+//						System.out.println(id);
+//						System.out.println(shape);
+//						System.out.println(splitLine[3]);
+//						System.out.println(splitLine[4]);
+//						System.out.println(splitLine[5]);
 						
 						editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 					}
@@ -79,7 +79,7 @@ public class EditorCommunicator extends Thread {
 						editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
 								Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
 					}
-					System.out.println("added");
+					//System.out.println("added");
 				}
 				else if(command.equals("recolor")) {
 					editor.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
@@ -88,7 +88,7 @@ public class EditorCommunicator extends Thread {
 					editor.deleteKnownShape(id);
 				}
 				else if(command.equals("setCorners")) {
-					System.out.println("setting corners");
+					//System.out.println("setting corners");
 					editor.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
 							Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
 				}
