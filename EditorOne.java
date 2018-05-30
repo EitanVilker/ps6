@@ -1,3 +1,5 @@
+//package ps6; // coment out
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;

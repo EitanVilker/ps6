@@ -1,3 +1,5 @@
+//package ps6; // cometn out
+
 import java.util.HashMap;
 
 public class Sketch {

@@ -1,3 +1,5 @@
+//package ps6; // coment out
+
 import java.net.*;
 import java.util.*;
 import java.awt.Color;
@@ -77,6 +79,21 @@ public class SketchServer {
 		}
 		if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
+		}
+	}
+	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
+		if(shape.equals("ellipse")) {
+			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
+		}
+		else if(shape.equals("rectange")) {
+			shapeMap.put(i, new Rectangle(x1, y1,x2, y2, color));
+		}
+		else if(shape.equals("segment")) {
+			shapeMap.put(i, new Segment(x1, y1, x2, y2, color));
+		}
+		else if(shape.equals("polyline")) {
+			shapeMap.put(i, new Polyline(x1, y1, color));
+			((Polyline) shapeMap.get(i)).addPoint(x2, y2);
 		}
 	}
 	

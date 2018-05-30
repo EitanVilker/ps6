@@ -1,3 +1,5 @@
+//package ps6; // comment this out before pushing
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -222,7 +224,6 @@ public class Editor extends JFrame {
 		else {
 			System.out.println("weird shape:"+shape);
 		}
-		System.out.println(shapeMap);
 		repaint();
 	}
 	
@@ -412,6 +413,7 @@ public class Editor extends JFrame {
 			addingId++;
 		}
 		drawFrom = null;
+		movingId = 0;
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 	}
 

@@ -1,3 +1,5 @@
+//package ps6; // comment out
+
 import java.awt.Color;
 import java.io.*;
 import java.net.Socket;

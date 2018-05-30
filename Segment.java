@@ -1,3 +1,5 @@
+//package ps6; // coment out
+
 import java.awt.Color;
 import java.awt.Graphics;
 
