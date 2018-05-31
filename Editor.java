@@ -1,4 +1,4 @@
-package ps6; // comment this out before pushing
+//package ps6; // comment this out before pushing
 
 import java.util.*;
 import java.awt.*;
@@ -41,7 +41,7 @@ public class Editor extends JFrame {
 	private Integer addingId = -1;				// current shape id (if any; else -1) being moved
 	private Point drawFrom = null;				// where the drawing started
 	private Point moveFrom = null;				// where object is as it's being dragged
-	private static boolean canDraw = true;
+	private static boolean canDraw = true;      // 
 
 	// Communication
 	private EditorCommunicator comm;			// communication with the sketch server
@@ -195,6 +195,9 @@ public class Editor extends JFrame {
 
 	// Helpers for event handlers
 	
+	/**
+	 * Adds a new shape to the client's map
+	 */
 	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
 		canDraw = false;
 		
@@ -211,9 +214,7 @@ public class Editor extends JFrame {
 		else if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
 		} 
-//		else {
-//			System.out.println("weird shape:"+shape);
-//		}
+
 		repaint();
 		addingId = i;
 		canDraw = true;
@@ -227,6 +228,9 @@ public class Editor extends JFrame {
 		}
 	}
 	
+	/**
+	 * Adds a shape with two Points 
+	 */
 	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
 		canDraw = false;
 		if(shape.equals("ellipse")) {
@@ -247,19 +251,27 @@ public class Editor extends JFrame {
 		canDraw = true;
 	}
 	
+	/**
+	 * When creating a new client, adds an entire polyline to the shapeMap
+	 */
 	public void addCompletePolylineToShapeMap(Integer i, ArrayList<Integer> coordinateList, Color color) {
 		shapeMap.put(i, new Polyline(coordinateList.get(0), coordinateList.get(1), color));
 		for(int j = 2; j < coordinateList.size(); j+= 2) {
 			((Polyline) shapeMap.get(i)).addPoint(coordinateList.get(j), coordinateList.get(j + 1));
-			
 		}
 	}
 	
+	/**
+	 * Changes the color of an already existing shape in the client
+	 */
 	public void recolorKnownShape(Integer i, Color color) {
-		Sketch.recolorKnownShape(i, color, shapeMap);
+		shapeMap.get(i).setColor(color);
 		repaint();
 	}
 	
+	/**
+	 * Removes a shape from the client's shapeMap
+	 */
 	public void deleteKnownShape(Integer i) {
 		canDraw = false;
 		shapeMap.remove(i);
@@ -267,6 +279,9 @@ public class Editor extends JFrame {
 		canDraw = true;
 	}
 	
+	/**
+	 * Updates the corners of an already existing shape in the client's shapeMap
+	 */
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
 		canDraw = false;
 		if(shape.equals("ellipse")) {
@@ -279,21 +294,31 @@ public class Editor extends JFrame {
 		canDraw = true;
 	}
 	
+	/**
+	 * Updates the end of an already existing segment in the client's shapeMap
+	 */
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
 		((Segment)(shapeMap.get(i))).setEnd(x, y);
 		repaint();
 	}
-	
+	/**
+	 * Updates the last point of an already existing polyline in the client's shapeMap
+	 */
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
 		((Polyline)(shapeMap.get(i))).addPoint(x, y);
 		repaint();
 	}
 	
+	/**
+	 * Updates the position of an already existing shape in the client's shapeMap
+	 */
 	public void updateKnownShapePosition(Integer i, int x, int y) {
 		shapeMap.get(i).moveBy(x, y);
 		repaint();
 	}
-	
+	/**
+	 * If a retraction needs to update a polyline this alows the last point to be reset to a new location
+	 */
 	public void polyLineRetract(Integer i,int x,int y) {
 		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
 	}
@@ -308,7 +333,7 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, start drawing a new shape
 		if(mode == Mode.DRAW) {
-			Sketch.drawNewMessage(comm, shapeType, p, color);
+			Message.drawNewMessage(comm, shapeType, p, color);
 			drawFrom = p;
 		}
 		
@@ -326,7 +351,7 @@ public class Editor extends JFrame {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					// Write message to EditorCommunicator to change color
-					Sketch.recolorMessage(comm,(Integer)number, color);
+					Message.recolorMessage(comm,(Integer)number, color);
 				}
 			}
 		}
@@ -336,7 +361,7 @@ public class Editor extends JFrame {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					// Write message to EditorCommunicator to delete
-					Sketch.deleteMessage(comm, (Integer)number);
+					Message.deleteMessage(comm, (Integer)number);
 				}
 			}
 			moveFrom = null;
@@ -359,7 +384,7 @@ public class Editor extends JFrame {
 				String type = shapeMap.get(addingId).getType();
 				
 				//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
-				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
+				Message.drawDragMessage(comm, addingId, type, p, drawFrom);
 			}
 			catch (NullPointerException e){
 				// Do nothing; the program just needs time to process the massive amount of information that is the polyline
@@ -370,7 +395,7 @@ public class Editor extends JFrame {
 			if(moveFrom == null) {
 				moveFrom = p;
 			}
-			Sketch.moveDragMessage(comm, p, moveFrom, movingId);			
+			Message.moveDragMessage(comm, p, moveFrom, movingId);			
 
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed

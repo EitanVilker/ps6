@@ -1,5 +1,3 @@
-package ps6; // coment out
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,7 +21,6 @@ public class EchoServer {
     public EchoServer(ServerSocket listen) {
         this.listen = listen;
     }
-//    public Sketch sketch = new Sketch();
 
     ///////////////////////////////////////////////////////////////////////
     

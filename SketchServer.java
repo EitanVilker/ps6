@@ -1,4 +1,4 @@
-package ps6; // comment out
+//package ps6; // comment out
 
 import java.net.*;
 import java.util.*;
@@ -14,35 +14,47 @@ import java.io.*;
 public class SketchServer {
 	private ServerSocket listen;						// for accepting connections
 	private ArrayList<SketchServerCommunicator> comms;	// all the connections with clients
-	private Sketch sketch;								// the state of the world
+	private Message message;								// the state of the world
 	private int addingId = 0;
-	private boolean doThings = true;
+	private boolean available = true;
 	private boolean retract = false;
 	private String retractionStatement = 0+",blah,rectangle,-1,-1,-16777216";
 	
 	public SketchServer(ServerSocket listen) {
 		this.listen = listen;
-		sketch = new Sketch();
+		message = new Message();
 		comms = new ArrayList<SketchServerCommunicator>();
 	}
-
-	public Sketch getSketch() {
-		return sketch;
-	}
+	
+	/**
+	 * Gets the next ID to be assigned
+	 */
 	public synchronized int getAddingId() {
 		addingId++;
 		return addingId;
 	}
+
+	/**
+	 * returns whether or not a retraction is needed
+	 */
 	public boolean getRetraction() {
 		return retract;
 	}
-	public void setRetraction(boolean in) {
-		retract = in;
+	
+	/**
+	 * sets whether or not a retraction is needed
+	 */
+	public void setRetraction(boolean state) {
+		retract = state;
 	}
+	
+	/**
+	 * returns String that contains command to retract erroneous change
+	 */
 	public String getRetractionStatement() {
 		return retractionStatement;
 	}
-	
+
 	private HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
 	
 	/**
@@ -58,6 +70,10 @@ public class SketchServer {
 			addCommunicator(comm);
 		}
 	}
+	
+	/**
+	 * @return String representation of the server's shapeMap 
+	 */
 	public synchronized String getWorldState() {
 		String hold = "";
 		for(Integer i: shapeMap.keySet()) {
@@ -66,9 +82,13 @@ public class SketchServer {
 		return hold;
 	}
 	
+	/**
+	 * Returns whether or not there are no shapes in the shapeMap
+	 */
 	public Boolean isEmpty() {
 		return shapeMap.isEmpty();
 	}
+	
 	/**
 	 * Adds the communicator to the list of current communicators
 	 */
@@ -92,6 +112,9 @@ public class SketchServer {
 		}
 	}
 	
+	/**
+	 * Adds a new shape to the server's map
+	 */
 	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
@@ -105,57 +128,47 @@ public class SketchServer {
 		if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
 		}
-		doThings = false;
+		available = false;
 	}
 	
-	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
-		if(shape.equals("ellipse")) {
-			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
-		}
-		else if(shape.equals("rectangle")) {
-			shapeMap.put(i, new Rectangle(x1, y1,x2, y2, color));
-		}
-		else if(shape.equals("segment")) {
-			shapeMap.put(i, new Segment(x1, y1, x2, y2, color));
-		}
-		else if(shape.equals("polyline")) {
-			shapeMap.put(i, new Polyline(x1, y1, color));
-			((Polyline) shapeMap.get(i)).addPoint(x2, y2);
-		}
-		doThings = false;
-	}
-	
+	/**
+	 * Updates the color of a shape in the server's shapeMap
+	 */
 	public void recolorKnownShape(Integer i, Color color) {
-		//System.out.println(doThings);
-		if(doThings) {
-			Sketch.recolorKnownShape(i, color, shapeMap);
+		if(available) {
+			shapeMap.get(i).setColor(color);
 			if(!retract) {
 				retractionStatement = i+",recolor,"+color.getRGB();
 			}
-		} else {
+		} 
+		else {
 			retract = true;
-			doThings = true;
+			available = true;
 		}
 		
 	}
 	
+	/**
+	 * Removes a shape from the server's shapeMap
+	 */
 	public void deleteKnownShape(Integer i) {
-		//System.out.println(doThings);
-		if(doThings) {
+		if(available) {
 			shapeMap.remove(i);
 			if(!retract) {
 				retractionStatement = i+",delete";
 			}
-		} else {
+		} 
+		else {
 			retract = true;
-			doThings = true;
-		}
-		
+			available = true;
+		}	
 	}
 	
+	/**
+	 * Updates the corners of an ellipse or rectangle in tje server's shapeMap
+	 */
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
-		//System.out.println(doThings);
-		if(doThings) {
+		if(available) {
 			if(shape.equals("ellipse")) {
 				((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 			}
@@ -165,41 +178,50 @@ public class SketchServer {
 			if (!retract) {
 				retractionStatement = i+",setCorners,"+shape+","+x1+","+y1+","+x2+","+y2;
 			}
-		}else {
+		}
+		else {
 			retract = true;
-			doThings = true;
+			available = true;
 		}
 	}
 	
+	/**
+	 * Updates the endpoint of a segment in the server's shapeMap
+	 */
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
-		//System.out.println(doThings);
-		if(doThings) {
+		if(available) {
 			((Segment)(shapeMap.get(i))).setEnd(x, y);
 			if (!retract) {
 				retractionStatement = i+",setEnd,"+x+","+y;
 			}
-		} else {
+		} 
+		else {
 			retract = true;
-			doThings = true;
+			available = true;
 		}
-		
 	}
 	
+	/**
+	 * Update's the last point added to a polyline in the server's shapeMap
+	 */
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		//System.out.println(doThings);
 		//((Polyline)(shapeMap.get(i))).addPoint(x, y);
-		if(doThings) {
+		if(available) {
 			((Polyline)(shapeMap.get(i))).addPoint(x, y);
 			if (!retract) {
 				retractionStatement = i+",polyRetract,"+x+","+y;
 			}
-		} else {
+		} 
+		else {
 			retract = true;
-			doThings = true;
+			available = true;
 		}
 		
 	}
 	
+	/**
+	 * Update's the position of a shape in the server's shapeMap
+	 */
 	public void updateKnownShapePosition(Integer i, int x, int y) {
 		shapeMap.get(i).moveBy(x, y);
 	}
