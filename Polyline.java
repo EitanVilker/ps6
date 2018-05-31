@@ -1,4 +1,4 @@
-//package ps6; // comment out
+package ps6; // comment out
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -58,6 +58,7 @@ public class Polyline implements Shape {
 	
 	public void updateLastPoint(int x, int y) {
 		pointList.set(pointList.size() - 1, new Point(x, y));
+		
 	}
 	
 	/**
@@ -106,6 +107,7 @@ public class Polyline implements Shape {
 		String temp = "";
 		for(Point p: pointList) {
 			temp += p.x + "," + p.y + ",";
+			System.out.println(p.x + "," + p.y);
 		}
 		return "polyline," + temp + "]," + color.getRGB();
 	}

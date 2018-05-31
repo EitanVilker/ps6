@@ -1,4 +1,4 @@
-//package ps6; // comment out
+package ps6; // comment out
 
 import java.net.*;
 import java.util.*;
@@ -16,6 +16,9 @@ public class SketchServer {
 	private ArrayList<SketchServerCommunicator> comms;	// all the connections with clients
 	private Sketch sketch;								// the state of the world
 	private int addingId = -1;
+	public boolean doThings = true;
+	//public boolean retract = false;
+	//public String retractionStatement = "";
 	
 	public SketchServer(ServerSocket listen) {
 		this.listen = listen;
@@ -93,6 +96,7 @@ public class SketchServer {
 		if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
 		}
+		doThings = false;
 	}
 	
 	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
@@ -112,7 +116,7 @@ public class SketchServer {
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
-		Sketch.recolorKnownShape(addingId, color, shapeMap);
+		Sketch.recolorKnownShape(i, color, shapeMap);
 	}
 	
 	public void deleteKnownShape(Integer i) {
@@ -120,11 +124,18 @@ public class SketchServer {
 	}
 	
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
-		if(shape.equals("ellipse")) {
-			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
-		}
-		if(shape.equals("rectangle")) {
-			((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+		System.out.println(doThings);
+		if(doThings) {
+			if(shape.equals("ellipse")) {
+				((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+			}
+			if(shape.equals("rectangle")) {
+				((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
+			}
+			//retractionStatement = i+",setCorners,"+x1+","+y1+","+x2+","+y2;
+		}else {
+			//retract = true;
+			doThings = true;
 		}
 	}
 	
@@ -133,7 +144,7 @@ public class SketchServer {
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
+		((Polyline)(shapeMap.get(i))).addPoint(x, y);
 	}
 	
 	public void updateKnownShapePosition(Integer i, int x, int y) {

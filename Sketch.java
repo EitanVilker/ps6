@@ -1,4 +1,4 @@
-//package ps6; // comment out
+package ps6; // comment out
 
 import java.awt.Color;
 import java.awt.Point;
@@ -21,7 +21,7 @@ public class Sketch {
 			comm.send(addingId+",setEnd,"+p.x+","+p.y);
 		}
 		else if((type.equals("polyline"))) {
-			comm.send(addingId+",updateLastPoint,"+p.x+","+p.y);
+			comm.send(addingId+",addPoint,"+p.x+","+p.y);
 		}
 	}
 	

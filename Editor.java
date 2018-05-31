@@ -1,4 +1,4 @@
-//package ps6; // comment this out before pushing
+package ps6; // comment this out before pushing
 
 import java.util.*;
 import java.awt.*;
@@ -247,12 +247,13 @@ public class Editor extends JFrame {
 	public void addCompletePolylineToShapeMap(Integer i, ArrayList<Integer> coordinateList, Color color) {
 		shapeMap.put(i, new Polyline(coordinateList.get(0), coordinateList.get(1), color));
 		for(int j = 2; j < coordinateList.size(); j+= 2) {
-			((Polyline) shapeMap.get(i)).addPoint(j, j + 1);
+			((Polyline) shapeMap.get(i)).addPoint(coordinateList.get(j), coordinateList.get(j + 1));
+			
 		}
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
-		Sketch.recolorMessage(comm, i, color);
+		Sketch.recolorKnownShape(i, color, shapeMap);
 		repaint();
 	}
 	
@@ -318,9 +319,8 @@ public class Editor extends JFrame {
 		if(mode == Mode.RECOLOR) {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
-					shapeMap.get(number).setColor(color);
 					// Write message to EditorCommunicator to change color
-					Sketch.recolorMessage(comm, addingId, color);
+					Sketch.recolorMessage(comm,(Integer)number, color);
 				}
 			}
 		}
@@ -329,9 +329,8 @@ public class Editor extends JFrame {
 		if(mode == Mode.DELETE) {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
-					//shapeMap.remove(number);
 					// Write message to EditorCommunicator to delete
-					Sketch.deleteMessage(comm, addingId);
+					Sketch.deleteMessage(comm, (Integer)number);
 				}
 			}
 			moveFrom = null;

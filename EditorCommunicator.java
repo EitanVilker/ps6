@@ -1,3 +1,5 @@
+package ps6;
+
 
 import java.awt.Color;
 import java.io.*;
@@ -96,7 +98,7 @@ public class EditorCommunicator extends Thread {
 				else if(command.equals("setEnd")) {
 					editor.updateKnownSegmentEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
-				else if(command.equals("updateLastPoint")) {
+				else if(command.equals("addPoint")) {
 					editor.updateKnownPolylineEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
 				else if(command.equals("moveBy")) {

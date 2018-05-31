@@ -1,4 +1,5 @@
-//package ps6; // comment out
+
+package ps6; // comment out
 
 import java.awt.Color;
 import java.io.*;
@@ -96,7 +97,7 @@ public class SketchServerCommunicator extends Thread {
 				else if(command.equals("setEnd")) {
 					server.updateKnownSegmentEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
-				else if(command.equals("updateLastPoint")) {
+				else if(command.equals("addPoint")) {
 					server.updateKnownPolylineEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
 				else if(command.equals("moveBy")) {
@@ -106,7 +107,17 @@ public class SketchServerCommunicator extends Thread {
 				for(int i=1; i< splitLine.length; i++) {
 					line += ","+splitLine[i];
 				}
+				
 				server.broadcast(line);
+				
+//				if(server.retract) {
+//					server.broadcast(server.retractionStatement);
+//					server.retract = false;
+//					System.out.println("retracted");
+//				}
+			
+				
+				
 			}
 			// Clean up -- note that also remove self from server's list so it doesn't broadcast here
 			server.removeCommunicator(this);
