@@ -107,7 +107,7 @@ public class Polyline implements Shape {
 		for(Point p: pointList) {
 			temp += p.x + "," + p.y + ",";
 		}
-		return "polyline," + temp + color.getRGB();
+		return "polyline," + temp + "]," + color.getRGB();
 	}
 
 	@Override

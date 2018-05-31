@@ -2,6 +2,7 @@
 import java.awt.Color;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Handles communication to/from the server for the editor
@@ -52,47 +53,35 @@ public class EditorCommunicator extends Thread {
 			System.out.println("there is indeed a try");
 			// Handle messages
 			// TODO: YOUR CODE HERE
-			//Thread.sleep(2000);
 			String line;
 			while ((line = in.readLine()) != null) {
-				//System.out.println("received:" + line);
 				String[] splitLine = line.split(",");
 				Integer id = Integer.valueOf(splitLine[0]);
 				String command = splitLine[1];
 				// Put statments don't check to see if it is in the map
 				if(command.equals("put")) {
 					String shape = splitLine[2];
-					// System.out.println(splitLine.length);
-					if(splitLine.length == 6) {
-//						System.out.println("inside");
-//						System.out.println(id);
-//						System.out.println(shape);
-//						System.out.println(splitLine[3]);
-//						System.out.println(splitLine[4]);
-//						System.out.println(splitLine[5]);
-						
+					
+					if(splitLine.length == 6) {	
 						editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 					}
-					//
-					//
-					//
-					//
-					//
-					//
-					// NumberFormatException here!
-					else {
-						System.out.println("The color is " + splitLine[7]);
+
+					else if(splitLine.length == 8){
 						editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
-								Integer.valueOf(splitLine[5]), 
-								Integer.valueOf(splitLine[6]), 
-								new Color(Integer.valueOf(splitLine[7])));
+								Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
 					}
-					//
-					//
-					//
-					//
-					//
-					//System.out.println("added");
+					
+					else {
+						ArrayList<Integer> polylineCoordinateList = new ArrayList<Integer>();
+						for(int i = 3; i < splitLine.length; i ++) {
+							if(splitLine[i].equals("]")) {
+								break;
+							}
+							polylineCoordinateList.add(Integer.valueOf(splitLine[i]));
+							
+						}
+						editor.addCompletePolylineToShapeMap(id, polylineCoordinateList, new Color(Integer.valueOf(splitLine[splitLine.length - 1])));
+					}
 				}
 				else if(command.equals("recolor")) {
 					editor.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
@@ -101,7 +90,6 @@ public class EditorCommunicator extends Thread {
 					editor.deleteKnownShape(id);
 				}
 				else if(command.equals("setCorners")) {
-					//System.out.println("setting corners");
 					editor.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
 							Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
 				}
@@ -115,7 +103,6 @@ public class EditorCommunicator extends Thread {
 					editor.updateKnownShapePosition(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
 				}
 			
-			//Thread.sleep(5000);
 			}
 		}
 		catch (Exception e) {
@@ -134,8 +121,6 @@ public class EditorCommunicator extends Thread {
 
 	// Send editor requests to the server
 	// TODO: YOUR CODE HERE
-	/*
-	 * send received messages to server
-	 */
-	
+	// This is handled within the Editor class using methods condensed within the Sketch class
+
 }

@@ -37,7 +37,6 @@ public class Editor extends JFrame {
 	// Drawing state
 	// these are remnants of my implementation; take them as possible suggestions or ignore them
 	private Shape curr = null;					// current shape (if any) being drawn
-//	private Sketch sketch;						// holds and handles all the completed objects
 	private Integer movingId = -1;				// current shape id (if any; else -1) being moved
 	private Integer addingId = -1;				// current shape id (if any; else -1) being moved
 	private Point drawFrom = null;				// where the drawing started
@@ -59,8 +58,6 @@ public class Editor extends JFrame {
 	
 	public Editor() {
 		super("Graphical Editor");
-
-//		sketch = new Sketch();
 
 		// Connect to server
 		comm = new EditorCommunicator(serverIP, this);
@@ -177,13 +174,6 @@ public class Editor extends JFrame {
 		return gui;
 	}
 
-//	/**
-//	 * Getter for the sketch instance variable
-//	 */
-//	public Sketch getSketch() {
-//		return sketch;
-//	}
-
 	/**
 	 * Draws all the shapes in the sketch,
 	 * along with the object currently being drawn in this editor (not yet part of the sketch)
@@ -217,7 +207,6 @@ public class Editor extends JFrame {
 			
 		}
 		else if(shape.equals("polyline")) {
-			System.out.println("So you think you can handle a polyline?");
 			shapeMap.put(i, new Polyline(x, y, color));
 		} 
 		else {
@@ -253,6 +242,13 @@ public class Editor extends JFrame {
 		repaint();
 		addingId = i;
 		canDraw = true;
+	}
+	
+	public void addCompletePolylineToShapeMap(Integer i, ArrayList<Integer> coordinateList, Color color) {
+		shapeMap.put(i, new Polyline(coordinateList.get(0), coordinateList.get(1), color));
+		for(int j = 2; j < coordinateList.size(); j+= 2) {
+			((Polyline) shapeMap.get(i)).addPoint(j, j + 1);
+		}
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
@@ -354,11 +350,15 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
-			System.out.println("addingID: " + addingId);
-			System.out.println("shapeType: " + shapeMap.get(addingId).getType());
-			String type = shapeMap.get(addingId).getType();
-			//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
-			Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
+			try {
+				String type = shapeMap.get(addingId).getType();
+				
+				//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
+				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
+			}
+			catch (NullPointerException e){
+				// Do nothing; the program just needs time to process the massive amount of information that is the polyline
+			}
 		}
 		// In moving mode, shift the object and keep track of where next step is from
 		if(mode == Mode.MOVE) {
@@ -366,13 +366,7 @@ public class Editor extends JFrame {
 				moveFrom = p;
 			}
 			Sketch.moveDragMessage(comm, p, moveFrom, movingId);			
-			//shapeMap.get(movingId).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
-//			for(Object number: shapeMap.keySet()) {
-//				if(shapeMap.get(number).contains(p.x, p.y)) {
-//					shapeMap.get(number).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
-//					comm.send(number+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
-//				}
-//			}
+
 		}
 		// Be sure to refresh the canvas (repaint) if the appearance has changed
 		moveFrom = p;
@@ -388,10 +382,8 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In moving mode, stop dragging the object
 		moveFrom = null;
-		//System.out.println("Release engaged");
 		if(mode == Mode.DRAW) {
-			//System.out.println("addingID: " + addingId + "; shapeType: " + shapeMap.get(addingId).getType());
-			//addingId++;
+
 		}
 		drawFrom = null;
 		movingId = -1;

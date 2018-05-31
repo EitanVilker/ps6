@@ -18,22 +18,16 @@ public class SketchServer {
 	private int addingId = -1;
 	
 	public SketchServer(ServerSocket listen) {
-		System.out.println("Server dinosaur");
 		this.listen = listen;
 		sketch = new Sketch();
 		comms = new ArrayList<SketchServerCommunicator>();
 	}
-	
-//	public void printAtWill() {
-//		System.out.println("WHERE IS MY WALRUS?");
-//	}
 
 	public Sketch getSketch() {
 		return sketch;
 	}
 	public synchronized int getAddingId() {
 		addingId++;
-		//System.out.println("this is the adding Id" + addingId);
 		return addingId;
 	}
 	
@@ -68,10 +62,6 @@ public class SketchServer {
 	 */
 	public synchronized void addCommunicator(SketchServerCommunicator comm) {
 		comms.add(comm);
-//		for(Integer i: shapeMap.keySet()) {
-//			comm.send(i+","+"put"+shapeMap.get(i).toString());
-//			System.out.println("addding new client");
-//		}
 	}
 
 	/**
