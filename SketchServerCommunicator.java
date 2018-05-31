@@ -46,7 +46,7 @@ public class SketchServerCommunicator extends Thread {
 				String[] holdState = server.getWorldState().split("/n");
 				for(int i=0; i<holdState.length;i++) {
 					out.println(holdState[i]);
-					System.out.println(holdState[i]);
+					//System.out.println(holdState[i]);
 				}
 								
 			}
@@ -55,12 +55,12 @@ public class SketchServerCommunicator extends Thread {
 			String line;
 			while((line = in.readLine()) != null) {
 				try {
-					System.out.println("received:" + line);
+					//System.out.println("received:" + line);
 					String[] splitLine = line.split(",");
 					Integer id = Integer.valueOf(splitLine[0]);
 					if (id == -1) {
 						id = server.getAddingId();
-						System.out.println("new id:" + id);
+						//System.out.println("new id:" + id);
 						
 					}
 					String command = splitLine[1];
@@ -82,7 +82,7 @@ public class SketchServerCommunicator extends Thread {
 							server.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
 									Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
 						}
-						System.out.println("added");
+						//System.out.println("added");
 					}
 					else if(command.equals("recolor")) {
 						server.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
@@ -114,7 +114,7 @@ public class SketchServerCommunicator extends Thread {
 					if(server.getRetraction()) {
 						server.broadcast(server.getRetractionStatement());
 						server.setRetraction(false);
-						System.out.println("retracted:" + server.getRetractionStatement());
+						//System.out.println("retracted:" + server.getRetractionStatement());
 					}
 				
 				} catch(Exception e) {

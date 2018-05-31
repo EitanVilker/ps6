@@ -18,7 +18,7 @@ public class SketchServer {
 	private int addingId = 0;
 	private boolean doThings = true;
 	private boolean retract = false;
-	private String retractionStatement = 0+",put,ellipse,-1,-1,-16777216";
+	private String retractionStatement = 0+",blah,rectangle,-1,-1,-16777216";
 	
 	public SketchServer(ServerSocket listen) {
 		this.listen = listen;
@@ -126,7 +126,7 @@ public class SketchServer {
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
-		System.out.println(doThings);
+		//System.out.println(doThings);
 		if(doThings) {
 			Sketch.recolorKnownShape(i, color, shapeMap);
 			if(!retract) {
@@ -140,7 +140,7 @@ public class SketchServer {
 	}
 	
 	public void deleteKnownShape(Integer i) {
-		System.out.println(doThings);
+		//System.out.println(doThings);
 		if(doThings) {
 			shapeMap.remove(i);
 			if(!retract) {
@@ -154,7 +154,7 @@ public class SketchServer {
 	}
 	
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
-		System.out.println(doThings);
+		//System.out.println(doThings);
 		if(doThings) {
 			if(shape.equals("ellipse")) {
 				((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
@@ -172,7 +172,7 @@ public class SketchServer {
 	}
 	
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
-		System.out.println(doThings);
+		//System.out.println(doThings);
 		if(doThings) {
 			((Segment)(shapeMap.get(i))).setEnd(x, y);
 			if (!retract) {
@@ -186,7 +186,7 @@ public class SketchServer {
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		System.out.println(doThings);
+		//System.out.println(doThings);
 		//((Polyline)(shapeMap.get(i))).addPoint(x, y);
 		if(doThings) {
 			((Polyline)(shapeMap.get(i))).addPoint(x, y);

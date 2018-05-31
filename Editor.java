@@ -171,8 +171,8 @@ public class Editor extends JFrame {
 		gui.add(chooseColorB);
 		gui.add(colorL);
 		gui.add(modesP);
-		addToShapeMap(0,"ellipse",-1,-1,new Color(-16777216));
-		updateKnownShapeCorners(0, "ellipse", -1, -1, -1, -1);
+		addToShapeMap(0,"blah",-1,-1,new Color(-16777216));
+		updateKnownShapeCorners(0, "blah", -1, -1, -1, -1);
 		return gui;
 	}
 
@@ -211,9 +211,9 @@ public class Editor extends JFrame {
 		else if(shape.equals("polyline")) {
 			shapeMap.put(i, new Polyline(x, y, color));
 		} 
-		else {
-			System.out.println("weird shape:"+shape);
-		}
+//		else {
+//			System.out.println("weird shape:"+shape);
+//		}
 		repaint();
 		addingId = i;
 		canDraw = true;

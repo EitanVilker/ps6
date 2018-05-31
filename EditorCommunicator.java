@@ -52,7 +52,7 @@ public class EditorCommunicator extends Thread {
 	public void run() {
 		System.out.println("run begun");
 		try {
-			System.out.println("there is indeed a try");
+			//System.out.println("there is indeed a try");
 			//editor.addToShapeMap(-2, "ellipse", -1, -1, new Color(-16777216));
 			// Handle messages
 			// TODO: YOUR CODE HERE
@@ -108,8 +108,6 @@ public class EditorCommunicator extends Thread {
 					} 
 					else if(command.equals("polyRetract")) {
 						editor.polyLineRetract(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
-					} else {
-						System.out.println("Weird command: " + command);
 					}
 				} catch (Exception e) {
 					System.out.println(line);
