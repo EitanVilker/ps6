@@ -15,10 +15,10 @@ public class SketchServer {
 	private ServerSocket listen;						// for accepting connections
 	private ArrayList<SketchServerCommunicator> comms;	// all the connections with clients
 	private Sketch sketch;								// the state of the world
-	private int addingId = -1;
-	public boolean doThings = true;
-	//public boolean retract = false;
-	//public String retractionStatement = "";
+	private int addingId = 0;
+	private boolean doThings = true;
+	private boolean retract = false;
+	private String retractionStatement = 0+",put,ellipse,-1,-1,-16777216";
 	
 	public SketchServer(ServerSocket listen) {
 		this.listen = listen;
@@ -32,6 +32,15 @@ public class SketchServer {
 	public synchronized int getAddingId() {
 		addingId++;
 		return addingId;
+	}
+	public boolean getRetraction() {
+		return retract;
+	}
+	public void setRetraction(boolean in) {
+		retract = in;
+	}
+	public String getRetractionStatement() {
+		return retractionStatement;
 	}
 	
 	private HashMap<Integer, Shape> shapeMap = new HashMap<Integer, Shape>();
@@ -113,14 +122,35 @@ public class SketchServer {
 			shapeMap.put(i, new Polyline(x1, y1, color));
 			((Polyline) shapeMap.get(i)).addPoint(x2, y2);
 		}
+		doThings = false;
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
-		Sketch.recolorKnownShape(i, color, shapeMap);
+		System.out.println(doThings);
+		if(doThings) {
+			Sketch.recolorKnownShape(i, color, shapeMap);
+			if(!retract) {
+				retractionStatement = i+",recolor,"+color.getRGB();
+			}
+		} else {
+			retract = true;
+			doThings = true;
+		}
+		
 	}
 	
 	public void deleteKnownShape(Integer i) {
-		shapeMap.remove(i);
+		System.out.println(doThings);
+		if(doThings) {
+			shapeMap.remove(i);
+			if(!retract) {
+				retractionStatement = i+",delete";
+			}
+		} else {
+			retract = true;
+			doThings = true;
+		}
+		
 	}
 	
 	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
@@ -132,19 +162,42 @@ public class SketchServer {
 			if(shape.equals("rectangle")) {
 				((Rectangle)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 			}
-			//retractionStatement = i+",setCorners,"+x1+","+y1+","+x2+","+y2;
+			if (!retract) {
+				retractionStatement = i+",setCorners,"+shape+","+x1+","+y1+","+x2+","+y2;
+			}
 		}else {
-			//retract = true;
+			retract = true;
 			doThings = true;
 		}
 	}
 	
 	public void updateKnownSegmentEnd(Integer i, int x, int y) {
-		((Segment)(shapeMap.get(i))).setEnd(x, y);
+		System.out.println(doThings);
+		if(doThings) {
+			((Segment)(shapeMap.get(i))).setEnd(x, y);
+			if (!retract) {
+				retractionStatement = i+",setEnd,"+x+","+y;
+			}
+		} else {
+			retract = true;
+			doThings = true;
+		}
+		
 	}
 	
 	public void updateKnownPolylineEnd(Integer i, int x, int y) {
-		((Polyline)(shapeMap.get(i))).addPoint(x, y);
+		System.out.println(doThings);
+		//((Polyline)(shapeMap.get(i))).addPoint(x, y);
+		if(doThings) {
+			((Polyline)(shapeMap.get(i))).addPoint(x, y);
+			if (!retract) {
+				retractionStatement = i+",polyRetract,"+x+","+y;
+			}
+		} else {
+			retract = true;
+			doThings = true;
+		}
+		
 	}
 	
 	public void updateKnownShapePosition(Integer i, int x, int y) {

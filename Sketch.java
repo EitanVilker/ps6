@@ -26,7 +26,9 @@ public class Sketch {
 	}
 	
 	public static void moveDragMessage(EditorCommunicator comm, Point p, Point moveFrom, int movingId) {
-		comm.send(movingId+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
+		if(movingId != -1) {
+			comm.send(movingId+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
+		}
 	}
 	
 	public static void recolorMessage(EditorCommunicator comm, Integer addingId, Color color) {

@@ -53,58 +53,68 @@ public class EditorCommunicator extends Thread {
 		System.out.println("run begun");
 		try {
 			System.out.println("there is indeed a try");
+			//editor.addToShapeMap(-2, "ellipse", -1, -1, new Color(-16777216));
 			// Handle messages
 			// TODO: YOUR CODE HERE
 			String line;
 			while ((line = in.readLine()) != null) {
-				String[] splitLine = line.split(",");
-				Integer id = Integer.valueOf(splitLine[0]);
-				String command = splitLine[1];
-				// Put statments don't check to see if it is in the map
-				if(command.equals("put")) {
-					String shape = splitLine[2];
-					
-					if(splitLine.length == 6) {	
-						editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
-					}
-
-					else if(splitLine.length == 8){
-						editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
-								Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
-					}
-					
-					else {
-						ArrayList<Integer> polylineCoordinateList = new ArrayList<Integer>();
-						for(int i = 3; i < splitLine.length; i ++) {
-							if(splitLine[i].equals("]")) {
-								break;
-							}
-							polylineCoordinateList.add(Integer.valueOf(splitLine[i]));
-							
+				try {
+					String[] splitLine = line.split(",");
+					Integer id = Integer.valueOf(splitLine[0]);
+					String command = splitLine[1];
+					// Put statments don't check to see if it is in the map
+					if(command.equals("put")) {
+						String shape = splitLine[2];
+						
+						if(splitLine.length == 6) {	
+							editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 						}
-						editor.addCompletePolylineToShapeMap(id, polylineCoordinateList, new Color(Integer.valueOf(splitLine[splitLine.length - 1])));
+	
+						else if(splitLine.length == 8){
+							editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
+									Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
+						}
+						
+						else {
+							ArrayList<Integer> polylineCoordinateList = new ArrayList<Integer>();
+							for(int i = 3; i < splitLine.length; i ++) {
+								if(splitLine[i].equals("]")) {
+									break;
+								}
+								polylineCoordinateList.add(Integer.valueOf(splitLine[i]));
+								
+							}
+							editor.addCompletePolylineToShapeMap(id, polylineCoordinateList, new Color(Integer.valueOf(splitLine[splitLine.length - 1])));
+						}
 					}
+					else if(command.equals("recolor")) {
+						editor.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
+					}
+					else if(command.equals("delete")) {
+						editor.deleteKnownShape(id);
+					}
+					else if(command.equals("setCorners")) {
+						editor.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
+								Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
+					}
+					else if(command.equals("setEnd")) {
+						editor.updateKnownSegmentEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
+					}
+					else if(command.equals("addPoint")) {
+						editor.updateKnownPolylineEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
+					}
+					else if(command.equals("moveBy")) {
+						editor.updateKnownShapePosition(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
+					} 
+					else if(command.equals("polyRetract")) {
+						editor.polyLineRetract(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
+					} else {
+						System.out.println("Weird command: " + command);
+					}
+				} catch (Exception e) {
+					System.out.println(line);
 				}
-				else if(command.equals("recolor")) {
-					editor.recolorKnownShape(id, new Color(Integer.valueOf(splitLine[2])));
-				}
-				else if(command.equals("delete")) {
-					editor.deleteKnownShape(id);
-				}
-				else if(command.equals("setCorners")) {
-					editor.updateKnownShapeCorners(id, splitLine[2], Integer.valueOf(splitLine[3]), 
-							Integer.valueOf(splitLine[4]), Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]));
-				}
-				else if(command.equals("setEnd")) {
-					editor.updateKnownSegmentEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
-				}
-				else if(command.equals("addPoint")) {
-					editor.updateKnownPolylineEnd(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
-				}
-				else if(command.equals("moveBy")) {
-					editor.updateKnownShapePosition(id, Integer.valueOf(splitLine[2]), Integer.valueOf(splitLine[3]));
-				}
-			
+
 			}
 		}
 		catch (Exception e) {
