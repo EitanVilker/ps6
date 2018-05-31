@@ -1,4 +1,4 @@
-package ps6; // coment out
+//package ps6; // comment out
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -107,7 +107,7 @@ public class Polyline implements Shape {
 		for(Point p: pointList) {
 			temp += p.x + "," + p.y + ",";
 		}
-		return "polyline," + temp + color;
+		return "polyline," + temp + color.getRGB();
 	}
 
 	@Override

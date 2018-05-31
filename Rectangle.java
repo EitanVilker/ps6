@@ -1,4 +1,4 @@
-package ps6; // coment out
+//package ps6; // comment out
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -88,6 +88,6 @@ public class Rectangle implements Shape {
 	}
 
 	public String toString() {
-		return "rectangle,"+x1+","+y1+","+x2+","+y2+","+color;
+		return "rectangle,"+x1+","+y1+","+x2+","+y2+","+color.getRGB();
 	}
 }

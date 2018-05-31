@@ -1,15 +1,8 @@
-package ps6; // comment this out before pushing
+//package ps6; // comment this out before pushing
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-
 import javax.swing.*;
 
 
@@ -204,13 +197,13 @@ public class Editor extends JFrame {
 				}
 			}
 		} catch (Exception e) {
-			// do nothing will be fixed in a millisecond
+			// do nothing; all will be fixed in a millisecond
 		}
 	}
 
 	// Helpers for event handlers
 	
-	public synchronized void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
 		canDraw = false;
 		
 		if(shape.equals("ellipse")) {
@@ -235,7 +228,8 @@ public class Editor extends JFrame {
 		canDraw = true;
 		try {
 			Thread.sleep(10);
-		} catch (InterruptedException e) {
+		} 
+		catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -247,7 +241,7 @@ public class Editor extends JFrame {
 			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
 		}
 		else if(shape.equals("rectangle")) {
-			shapeMap.put(i, new Rectangle(x1, y1,x2, y2, color));
+			shapeMap.put(i, new Rectangle(x1, y1, x2, y2, color));
 		}
 		else if(shape.equals("segment")) {
 			shapeMap.put(i, new Segment(x1, y1, x2, y2, color));
@@ -262,7 +256,7 @@ public class Editor extends JFrame {
 	}
 	
 	public void recolorKnownShape(Integer i, Color color) {
-		shapeMap.get(i).setColor(color);
+		Sketch.recolorMessage(comm, i, color);
 		repaint();
 	}
 	
@@ -273,7 +267,7 @@ public class Editor extends JFrame {
 		canDraw = true;
 	}
 	
-	public synchronized void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
 		canDraw = false;
 		if(shape.equals("ellipse")) {
 			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
@@ -330,17 +324,18 @@ public class Editor extends JFrame {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					shapeMap.get(number).setColor(color);
 					// Write message to EditorCommunicator to change color
-					comm.send(number+",recolor,"+color.getRGB());
+					Sketch.recolorMessage(comm, addingId, color);
 				}
 			}
 		}
+		
 		// In deleting mode, delete the shape if clicked in it
 		if(mode == Mode.DELETE) {
 			for(Object number: shapeMap.keySet()) {
 				if(shapeMap.get(number).contains(p.x, p.y)) {
 					//shapeMap.remove(number);
 					// Write message to EditorCommunicator to delete
-					comm.send(number+",delete");
+					Sketch.deleteMessage(comm, addingId);
 				}
 			}
 			moveFrom = null;
@@ -359,29 +354,18 @@ public class Editor extends JFrame {
 		// TODO: YOUR CODE HERE
 		// In drawing mode, revise the shape as it is stretched out
 		if(mode == Mode.DRAW) {
+			System.out.println("addingID: " + addingId);
+			System.out.println("shapeType: " + shapeMap.get(addingId).getType());
 			String type = shapeMap.get(addingId).getType();
-			//System.out.println(shapeMap.get(addingId));
-			if(shapeMap.get(addingId).getType().equals("ellipse")) {
-				//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
-				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
-			}
-			else if(((Shape)(shapeMap.get(addingId))).getType().equals("rectangle")) {
-				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
-				
-			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("segment")) {
-				//((Segment)(holdShape)).setEnd(p.x, p.y);
-				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
-			} else if(((Shape)(shapeMap.get(addingId))).getType().equals("polyline")) {
-				//((Polyline)(holdShape)).updateLastPoint(p.x, p.y);
-				Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
-			}
+			//((Ellipse)(holdShape)).setCorners(drawFrom.x, drawFrom.y, p.x, p.y);
+			Sketch.drawDragMessage(comm, addingId, type, p, drawFrom);
 		}
 		// In moving mode, shift the object and keep track of where next step is from
 		if(mode == Mode.MOVE) {
 			if(moveFrom == null) {
 				moveFrom = p;
 			}
-			comm.send(movingId+",moveBy,"+(p.x - moveFrom.x)+","+(p.y - moveFrom.y));
+			Sketch.moveDragMessage(comm, p, moveFrom, movingId);			
 			//shapeMap.get(movingId).moveBy(p.x - moveFrom.x, p.y - moveFrom.y);
 //			for(Object number: shapeMap.keySet()) {
 //				if(shapeMap.get(number).contains(p.x, p.y)) {

@@ -1,9 +1,7 @@
-package ps6; // comment out
 
 import java.awt.Color;
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
 
 /**
  * Handles communication to/from the server for the editor
@@ -75,10 +73,25 @@ public class EditorCommunicator extends Thread {
 						
 						editor.addToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), new Color(Integer.valueOf(splitLine[5])));
 					}
+					//
+					//
+					//
+					//
+					//
+					//
+					// NumberFormatException here!
 					else {
+						System.out.println("The color is " + splitLine[7]);
 						editor.addCompleteToShapeMap(id, shape, Integer.valueOf(splitLine[3]), Integer.valueOf(splitLine[4]), 
-								Integer.valueOf(splitLine[5]), Integer.valueOf(splitLine[6]), new Color(Integer.valueOf(splitLine[7])));
+								Integer.valueOf(splitLine[5]), 
+								Integer.valueOf(splitLine[6]), 
+								new Color(Integer.valueOf(splitLine[7])));
 					}
+					//
+					//
+					//
+					//
+					//
 					//System.out.println("added");
 				}
 				else if(command.equals("recolor")) {

@@ -1,4 +1,4 @@
-package ps6; // coment out
+//package ps6; // comment out
 
 import java.net.*;
 import java.util.*;
@@ -90,7 +90,7 @@ public class SketchServer {
 		}
 	}
 	
-	public synchronized void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
+	public void addToShapeMap(Integer i, String shape, int x, int y, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x, y, color));
 		}
@@ -105,7 +105,7 @@ public class SketchServer {
 		}
 	}
 	
-	public synchronized void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
+	public void addCompleteToShapeMap(Integer i, String shape, int x1, int y1, int x2, int y2, Color color) {
 		if(shape.equals("ellipse")) {
 			shapeMap.put(i, new Ellipse(x1, y1, x2, y2, color));
 		}
@@ -121,15 +121,15 @@ public class SketchServer {
 		}
 	}
 	
-	public synchronized void recolorKnownShape(Integer i, Color color) {
-		shapeMap.get(i).setColor(color);
+	public void recolorKnownShape(Integer i, Color color) {
+		Sketch.recolorKnownShape(addingId, color, shapeMap);
 	}
 	
-	public synchronized void deleteKnownShape(Integer i) {
+	public void deleteKnownShape(Integer i) {
 		shapeMap.remove(i);
 	}
 	
-	public synchronized void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
+	public void updateKnownShapeCorners(Integer i, String shape, int x1, int y1, int x2, int y2) {
 		if(shape.equals("ellipse")) {
 			((Ellipse)(shapeMap.get(i))).setCorners(x1, y1, x2, y2);
 		}
@@ -138,15 +138,15 @@ public class SketchServer {
 		}
 	}
 	
-	public synchronized void updateKnownSegmentEnd(Integer i, int x, int y) {
+	public void updateKnownSegmentEnd(Integer i, int x, int y) {
 		((Segment)(shapeMap.get(i))).setEnd(x, y);
 	}
 	
-	public synchronized void updateKnownPolylineEnd(Integer i, int x, int y) {
+	public void updateKnownPolylineEnd(Integer i, int x, int y) {
 		((Polyline)(shapeMap.get(i))).updateLastPoint(x, y);
 	}
 	
-	public synchronized void updateKnownShapePosition(Integer i, int x, int y) {
+	public void updateKnownShapePosition(Integer i, int x, int y) {
 		shapeMap.get(i).moveBy(x, y);
 	}
 	
